@@ -14,5 +14,15 @@ namespace IslandsOfRenguard.Scripts.WorldGen
         {
             _tileMap = tileMap;
         }
+
+        public ID GetTile(int x, int y)
+        {
+            return _tileMap[x, y];
+        }
+
+        public Point GetSize()
+        {
+            return new Point(_tileMap.GetLength(0), _tileMap.GetLength(1));
+        }
     }
 }

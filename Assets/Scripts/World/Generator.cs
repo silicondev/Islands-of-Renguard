@@ -18,6 +18,7 @@ namespace IslandsOfRenguard.Scripts.WorldGen
 
         public World Generate()
         {
+            int seed = Random.Range(0, 1000);
             int height = (int)_settings.WorldSize.Y;
             int width = (int)_settings.WorldSize.X;
             ID[,] tileMap = new ID[width, height];
@@ -26,9 +27,9 @@ namespace IslandsOfRenguard.Scripts.WorldGen
             {
                 for (int x = 0; x < width; x++)
                 {
-                    float xPerlin = x / width * _settings.Scale;
-                    float yPerlin = y / height * _settings.Scale;
-                    float map = Mathf.PerlinNoise(xPerlin, yPerlin);
+                    float xPerlin = ((seed + x) / (width / 10)) * _settings.Scale;
+                    float yPerlin = ((seed + y) / (height / 10)) * _settings.Scale;
+                    float map = Mathf.PerlinNoise(xPerlin, yPerlin) * 255;
                     tileMap[x, y] = _mapper.ParseHeight(map);
                 }
             }
