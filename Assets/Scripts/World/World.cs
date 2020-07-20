@@ -9,13 +9,13 @@ namespace IslandsOfRenguard.Scripts.WorldGen
 {
     public class World
     {
-        private ID[,] _tileMap;
-        public World(ID[,] tileMap)
+        private Tile[,] _tileMap;
+        public World(Tile[,] tileMap)
         {
             _tileMap = tileMap;
         }
 
-        public ID GetTile(int x, int y)
+        public Tile GetTile(int x, int y)
         {
             return _tileMap[x, y];
         }

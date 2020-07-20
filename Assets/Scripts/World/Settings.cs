@@ -17,6 +17,7 @@ namespace IslandsOfRenguard.Scripts.WorldGen
         {
             ShallowWaterLevel = sWater;
             DeepWaterLevel = dWater;
+            MountainLevel = mountain;
         }
     }
 

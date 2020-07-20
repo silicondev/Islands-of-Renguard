@@ -29,10 +29,16 @@ namespace IslandsOfRenguard.Scripts.Frontend
 
         private void GenerateGrid()
         {
-            //Debug.Log(Mathf.PerlinNoise(2.1F, 0.1F));
-
+            //Debug.Log(Mathf.PerlinNoise(0.1F, 0.1F));
+            //Debug.Log(Mathf.PerlinNoise(0.2F, 0.2F));
+            //Debug.Log(Mathf.PerlinNoise(0.5F, 0.5F));
+            //Debug.Log(Mathf.PerlinNoise(2.1F, 6.1F));
+            //Debug.Log(Mathf.PerlinNoise(0.1F, 0.0F));
+            //Debug.Log(Mathf.PerlinNoise(5634657236.1F, 0.1F));
+            //Debug.Log(Mathf.PerlinNoise(5634657236.0F, 0.0F));
+            //Debug.Log(Mathf.PerlinNoise(100000000000000F, 98));
             //return;
-            world = new Generator(new GeneratorSettings(1000, 1000, 1), new WorldMapperSettings(0, 0, 300)).Generate();
+            world = new Generator(new GeneratorSettings(1000, 1000, 0.7F), new WorldMapperSettings(40, 60, 200)).Generate();
 
             GameObject grassRef = (GameObject)Instantiate(Resources.Load("Tile_Env_Grass"));
             GameObject stoneRef = (GameObject)Instantiate(Resources.Load("Tile_Env_Stone"));
@@ -54,19 +60,19 @@ namespace IslandsOfRenguard.Scripts.Frontend
                 {
                     var tile = world.GetTile(xStart + x, yStart + y);
                     GameObject tileObj =
-                        tile == Tile.ENV.STONE ? Instantiate(stoneRef, transform) :
-                        tile == Tile.ENV.WATER ? Instantiate(waterRef, transform) :
+                        tile.ID == TileID.ENV.STONE ? Instantiate(stoneRef, transform) :
+                        tile.ID == TileID.ENV.WATER ? Instantiate(waterRef, transform) :
                         Instantiate(grassRef, transform);
 
+                    Debug.Log(tile.Height.ToString());
+
                     tileObj.name = string.Format("TILE_{0},{1}", x.ToString(), y.ToString());
-                    float posX = (x - gridStartX) * _tileSize;
-                    float posY = (y - gridStartY) * -_tileSize;
+                    float posX = ((x - gridStartX) * _tileSize) + 0.5F;
+                    float posY = ((y - gridStartY) * -_tileSize) + 0.5F;
                     tileObj.transform.position = new Vector2(posX, posY);
                     Tiles[y].Add(tileObj);
                 }
             }
-
-            Debug.Log((Tiles.Count * Tiles[0].Count).ToString());
 
             Destroy(grassRef);
             Destroy(stoneRef);

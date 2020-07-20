@@ -31,13 +31,13 @@ namespace IslandsOfRenguard.Scripts.Player
                 switch (e.KeyPressed)
                 {
                     case KeyCode.W:
-                        MoveY(-1);
+                        MoveY(1);
                         break;
                     case KeyCode.A:
                         MoveX(-1);
                         break;
                     case KeyCode.S:
-                        MoveY(1);
+                        MoveY(-1);
                         break;
                     case KeyCode.D:
                         MoveX(1);

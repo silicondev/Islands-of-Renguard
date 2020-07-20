@@ -7,7 +7,7 @@ namespace IslandsOfRenguard.Scripts.Universal
 {
     public class InputEvents : MonoBehaviour
     {
-        private Dictionary<KeyCode, bool> _isKeyPressed;
+        private Dictionary<KeyCode, bool> _isKeyPressed = new Dictionary<KeyCode, bool>();
 
         private void Update()
         {
@@ -46,6 +46,7 @@ namespace IslandsOfRenguard.Scripts.Universal
 
         private bool CheckKey(KeyCode key)
         {
+            if (!_isKeyPressed.ContainsKey(key)) _isKeyPressed[key] = Input.GetKeyDown(key);
             CheckKeyUp(key);
             bool val = Input.GetKeyDown(key) && !_isKeyPressed[key];
             if (val) _isKeyPressed[key] = true;

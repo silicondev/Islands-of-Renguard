@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace IslandsOfRenguard.Scripts.WorldGen
 {
-    public static class Tile
+    public static class TileID
     {
         public static class ENV
         {
@@ -18,6 +18,18 @@ namespace IslandsOfRenguard.Scripts.WorldGen
             public static readonly ID WATER = 4;
             public static readonly ID CAVE = 5;
             public static readonly ID ROCK = 6;
+        }
+    }
+
+    public class Tile
+    {
+        public ID ID { get; set; }
+        public float Height { get; }
+
+        public Tile(ID id, float height)
+        {
+            ID = id;
+            Height = height;
         }
     }
 }
