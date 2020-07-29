@@ -25,11 +25,13 @@ namespace IslandsOfRenguard.Scripts.WorldGen
     {
         public ID ID { get; set; }
         public float Height { get; }
+        public Point Location { get; }
 
-        public Tile(ID id, float height)
+        public Tile(ID id, float height, int xLoc, int yLoc)
         {
             ID = id;
             Height = height;
+            Location = new Point(xLoc, yLoc);
         }
     }
 }

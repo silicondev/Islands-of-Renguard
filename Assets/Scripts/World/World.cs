@@ -7,22 +7,28 @@ using System.Threading.Tasks;
 
 namespace IslandsOfRenguard.Scripts.WorldGen
 {
-    public class World
-    {
-        private Tile[,] _tileMap;
-        public World(Tile[,] tileMap)
-        {
-            _tileMap = tileMap;
-        }
+    //public class World
+    //{
+    //    private Tile[,] _tileMap;
+    //    public Generator Generator { get; private set; }
+    //    public World(Tile[,] tileMap)
+    //    {
+    //        _tileMap = tileMap;
+    //    }
 
-        public Tile GetTile(int x, int y)
-        {
-            return _tileMap[x, y];
-        }
+    //    public World(Generator gen)
+    //    {
+    //        Generator = gen;
+    //    }
 
-        public Point GetSize()
-        {
-            return new Point(_tileMap.GetLength(0), _tileMap.GetLength(1));
-        }
-    }
+    //    public Tile GetTile(int x, int y)
+    //    {
+    //        return _tileMap[x, y];
+    //    }
+
+    //    public Point GetSize()
+    //    {
+    //        return new Point(_tileMap.GetLength(0), _tileMap.GetLength(1));
+    //    }
+    //}
 }

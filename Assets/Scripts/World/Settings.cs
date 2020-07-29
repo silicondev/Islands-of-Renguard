@@ -25,10 +25,15 @@ namespace IslandsOfRenguard.Scripts.WorldGen
     {
         public float Scale { get; } = 1.0F;
         public Point WorldSize { get; }
-        public GeneratorSettings(int sizeX, int sizeY, float scale)
+        public float Seed { get; }
+        public int ChunkSize { get; }
+        public GeneratorSettings(int sizeX, int sizeY, float scale, float seed, int chunkSize)
         {
             WorldSize = new Point(sizeX, sizeY);
             Scale = scale;
+            if (seed - (int)seed == 0) seed += 0.1F;
+            Seed = seed;
+            ChunkSize = chunkSize;
         }
     }
 }
