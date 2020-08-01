@@ -7,7 +7,6 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEditorInternal;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
 namespace IslandsOfRenguard.Assets.Scripts.World
 {
@@ -34,7 +33,7 @@ namespace IslandsOfRenguard.Assets.Scripts.World
 
         private GeneratorSettings _settings;
         private WorldMapper _mapper;
-        public List<List<Tile>> Tiles { get; } = new List<List<Tile>>();
+        public List<List<Tile>> Tiles { get; private set; } = new List<List<Tile>>();
         public List<GameObject> Objects { get; set; } = new List<GameObject>();
 
         public Chunk(int x, int y, GeneratorSettings gen, WorldMapperSettings worldMap)
@@ -60,10 +59,11 @@ namespace IslandsOfRenguard.Assets.Scripts.World
             float xStart = _settings.Seed + xPos;
             float yStart = _settings.Seed + yPos;
             int chunkSize = _settings.ChunkSize;
-            for (int y = 0; y > chunkSize; y++)
+            Tiles = new List<List<Tile>>();
+            for (int y = 0; y < chunkSize; y++)
             {
                 Tiles.Add(new List<Tile>());
-                for (int x = 0; x > chunkSize; x++)
+                for (int x = 0; x < chunkSize; x++)
                 {
                     float perlinX = x + xStart;
                     float perlinY = y + yStart;
