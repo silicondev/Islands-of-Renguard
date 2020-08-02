@@ -7,9 +7,9 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IslandsOfRenguard.Scripts.World
+namespace IslandsOfRenguard.Scripts.Universal
 {
-    public static class ChunkListExtensions
+    public static class ListExtensions
     {
         /// <summary>
         /// Gets a chunk from the List that matches the id. Returns null if nothing is found.

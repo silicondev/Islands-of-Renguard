@@ -18,7 +18,7 @@ namespace IslandsOfRenguard.Assets.Scripts.World
         {
             get
             {
-                return (xPos / _settings.ChunkSize).ToString() + ";" + (yPos / _settings.ChunkSize).ToString();
+                return (xPos / _generator.ChunkSize).ToString() + ";" + (yPos / _generator.ChunkSize).ToString();
             }
         }
 
@@ -26,58 +26,41 @@ namespace IslandsOfRenguard.Assets.Scripts.World
         {
             get
             {
-                int chunkS = _settings.ChunkSize;
+                int chunkS = _generator.ChunkSize;
                 return new Point(xPos / chunkS, yPos / chunkS);
             }
         }
 
-        private GeneratorSettings _settings;
-        private WorldMapper _mapper;
+        private Generator _generator;
         public List<List<Tile>> Tiles { get; private set; } = new List<List<Tile>>();
         public List<GameObject> Objects { get; set; } = new List<GameObject>();
 
-        public Chunk(int x, int y, GeneratorSettings gen, WorldMapperSettings worldMap)
+        public Chunk(int x, int y, Generator gen)
         {
-            Setup(x, y, gen, worldMap);
+            Setup(x, y, gen);
         }
 
-        public Chunk(Point id, GeneratorSettings gen, WorldMapperSettings worldMap)
+        public Chunk(Point id, Generator gen)
         {
-            Setup((int)id.X * gen.ChunkSize, (int)id.Y * gen.ChunkSize, gen, worldMap);
+            Setup((int)id.X * gen.ChunkSize, (int)id.Y * gen.ChunkSize, gen);
         }
 
-        private void Setup(int x, int y, GeneratorSettings gen, WorldMapperSettings worldMap)
+        private void Setup(int x, int y, Generator gen)
         {
-            _settings = gen;
+            _generator = gen;
             xPos = x;
             yPos = y;
-            _mapper = new WorldMapper(worldMap);
         }
 
         public void Generate()
         {
-            float xStart = _settings.Seed + xPos;
-            float yStart = _settings.Seed + yPos;
-            int chunkSize = _settings.ChunkSize;
-            Tiles = new List<List<Tile>>();
-            for (int y = 0; y < chunkSize; y++)
-            {
-                Tiles.Add(new List<Tile>());
-                for (int x = 0; x < chunkSize; x++)
-                {
-                    float perlinX = x + xStart;
-                    float perlinY = y + yStart;
-                    float height = Mathf.PerlinNoise(perlinX, perlinY)*255;
-                    Tile tile = new Tile(_mapper.ParseHeight(height), height, xPos + x, yPos + y);
-                    Tiles[y].Add(tile);
-                }
-            }
+            Tiles = _generator.GenerateChunk(ID);
         }
         
         public bool Contains(int x, int y) => 
             x >= xPos &&
-            x < xPos + _settings.ChunkSize &&
+            x < xPos + _generator.ChunkSize &&
             y >= yPos &&
-            y < yPos + _settings.ChunkSize;
+            y < yPos + _generator.ChunkSize;
     }
 }

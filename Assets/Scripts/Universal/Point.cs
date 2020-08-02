@@ -1,10 +1,11 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace IslandsOfRenguard.Scripts.Universal
 {
-    public class Point
+    public class Point : IEquatable<Point>
     {
         public float X = 0;
         public float Y = 0;
@@ -15,6 +16,20 @@ namespace IslandsOfRenguard.Scripts.Universal
             Y = y;
         }
 
+        public bool Equals(Point other)
+        {
+            return X == other.X && Y == other.Y;
+        }
+
+        public override bool Equals(object obj)
+        {
+            Point other;
+            if (obj is Point point)
+                other = point;
+            else return false;
+            return X == other.X && Y == other.Y;
+        }
+
         public static bool operator ==(Point a, Point b)
         {
             return a.X == b.X && a.Y == b.Y;
@@ -23,6 +38,14 @@ namespace IslandsOfRenguard.Scripts.Universal
         public static bool operator !=(Point a, Point b)
         {
             return a.X != b.X && a.Y != b.Y;
+        }
+
+        public override int GetHashCode()
+        {
+            int hash = 47;
+            hash = hash * 59 + X.GetHashCode();
+            hash = hash * 59 + Y.GetHashCode();
+            return hash;
         }
     }
 }

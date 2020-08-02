@@ -1,6 +1,5 @@
 ﻿using IslandsOfRenguard.Assets.Scripts.World;
 using IslandsOfRenguard.Scripts.Player;
-using IslandsOfRenguard.Scripts.World;
 using IslandsOfRenguard.Scripts.WorldGen;
 using System;
 using System.Collections;
@@ -15,7 +14,7 @@ namespace IslandsOfRenguard.Scripts.Universal
         public GameSystem Instance { get; private set; }
 
         private PlayerManager _player;
-        private GeneratorSettings _generator;
+        private Generator _generator;
         private WorldMapperSettings _mapper;
 
         private List<Chunk> _generatedChunks = new List<Chunk>();
@@ -35,8 +34,10 @@ namespace IslandsOfRenguard.Scripts.Universal
         // Start is called before the first frame update
         void Start()
         {
-            _generator = new GeneratorSettings(1000, 1000, 0.05F, Random.Range(0.0F, 10000.0F), 16);
-            _mapper = new WorldMapperSettings(80, 100, 200);
+            var seed = Random.Range(0.0F, 10000.0F);
+            _mapper = new WorldMapperSettings(80, 100, 105, 200);
+            _generator = new Generator(0.01F, seed, 16, new WorldMapper(_mapper));
+            Debug.Log("Seed: " + seed.ToString());
 
             var playerObj = GameObject.FindWithTag("Player");
             if (playerObj != null)
@@ -99,21 +100,27 @@ namespace IslandsOfRenguard.Scripts.Universal
             {
                 for (int x = (int)topLeftDraw.X; x < (int)bottomRightDraw.X; x++)
                 {
+                    // If chunk is already loaded, then skip this loop
                     if (_loadedChunks.GetChunkWithTile(x, y) != null)
                     {
                         foundChunks.Add(_loadedChunks.GetChunkWithTile(x, y));
                         continue;
                     }
 
+                    // Find chunk if exists
                     var id = new Point((int)Math.Floor(x / 16d), (int)Math.Floor(y / 16d));
                     var exists = _generatedChunks.GetChunk(id) != null;
-                    var newChunk = exists ? _generatedChunks.GetChunk(id) : new Chunk(id, _generator, _mapper);
+                    var newChunk = exists ? _generatedChunks.GetChunk(id) : new Chunk(id, _generator);
+
+                    // Chunk does not already exist, generate a new one.
                     if (!exists)
                     {
                         hasNewChunks = true;
                         newChunk.Generate();
                         _generatedChunks.Add(newChunk);
                     }
+
+                    // Load chunk
                     _loadedChunks.Add(newChunk);
                     LoadChunk(newChunk);
                     if (newChunk.Contains(posX, posY)) _current = newChunk;
@@ -121,6 +128,7 @@ namespace IslandsOfRenguard.Scripts.Universal
             }
             if (hasNewChunks) Debug.Log("Current Generated Chunks: " + _generatedChunks.Count);
 
+            // Unload unneeded chunks
             List<Chunk> removeChunks = new List<Chunk>();
             foreach (var chunk in _loadedChunks)
             {
@@ -140,7 +148,7 @@ namespace IslandsOfRenguard.Scripts.Universal
         }
 
         /// <summary>
-        /// Loads the chunk into user viewable Objects.
+        /// Loads the chunk into GameObjects.
         /// </summary>
         /// <param name="chunk">The chunk to load.</param>
         private void LoadChunk(Chunk chunk)
@@ -148,15 +156,24 @@ namespace IslandsOfRenguard.Scripts.Universal
             GameObject grassRef = (GameObject)Instantiate(Resources.Load("Tile_Env_Grass"));
             GameObject stoneRef = (GameObject)Instantiate(Resources.Load("Tile_Env_Stone"));
             GameObject waterRef = (GameObject)Instantiate(Resources.Load("Tile_Env_Water"));
+            GameObject sandRef = (GameObject)Instantiate(Resources.Load("Tile_Env_Sand"));
 
             foreach (var tileList in chunk.Tiles)
             {
                 foreach (var tile in tileList)
                 {
-                    GameObject obj =
-                        tile.ID == TileID.ENV.STONE ? Instantiate(stoneRef, transform) :
-                        tile.ID == TileID.ENV.WATER ? Instantiate(waterRef, transform) :
-                        Instantiate(grassRef, transform);
+                    GameObject obj;
+
+                    if (tile.ID == TileID.ENV.STONE)
+                        obj = Instantiate(stoneRef, transform);
+                    else if (tile.ID == TileID.ENV.WATER)
+                        obj = Instantiate(waterRef, transform);
+                    else if (tile.ID == TileID.ENV.SAND)
+                        obj = Instantiate(sandRef, transform);
+                    else
+                        obj = Instantiate(grassRef, transform);
+
+                    obj.name = obj.name.Substring(0, obj.name.Length - 14);
 
                     obj.transform.position = new Vector2(tile.Location.X + 0.5F, tile.Location.Y + 0.5F);
                     chunk.Objects.Add(obj);
@@ -166,6 +183,7 @@ namespace IslandsOfRenguard.Scripts.Universal
             Destroy(grassRef);
             Destroy(stoneRef);
             Destroy(waterRef);
+            Destroy(sandRef);
         }
 
         /// <summary>

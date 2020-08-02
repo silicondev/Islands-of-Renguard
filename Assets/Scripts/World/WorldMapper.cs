@@ -18,6 +18,8 @@ namespace IslandsOfRenguard.Scripts.WorldGen
         {
             if (height > _settings.MountainLevel)
                 return TileID.ENV.STONE;
+            else if (height > _settings.ShallowWaterLevel && height <= _settings.SandLevel)
+                return TileID.ENV.SAND;
             else if (height < _settings.ShallowWaterLevel)
                 return TileID.ENV.WATER;
             else
