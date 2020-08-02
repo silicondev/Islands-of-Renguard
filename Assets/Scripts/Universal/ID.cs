@@ -28,5 +28,7 @@ namespace IslandsOfRenguard.Scripts.Universal
         {
             return a._id != b._id;
         }
+
+        public int Value => _id;
     }
 }

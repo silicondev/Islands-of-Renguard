@@ -67,7 +67,7 @@ namespace IslandsOfRenguard.Assets.Scripts.World
                 {
                     float perlinX = x + xStart;
                     float perlinY = y + yStart;
-                    float height = Mathf.PerlinNoise(perlinX, perlinY);
+                    float height = Mathf.PerlinNoise(perlinX, perlinY)*255;
                     Tile tile = new Tile(_mapper.ParseHeight(height), height, xPos + x, yPos + y);
                     Tiles[y].Add(tile);
                 }

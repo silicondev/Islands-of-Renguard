@@ -1,5 +1,4 @@
 ﻿using IslandsOfRenguard.Assets.Scripts.World;
-//using IslandsOfRenguard.Scripts.Frontend;
 using IslandsOfRenguard.Scripts.Player;
 using IslandsOfRenguard.Scripts.World;
 using IslandsOfRenguard.Scripts.WorldGen;
@@ -16,17 +15,12 @@ namespace IslandsOfRenguard.Scripts.Universal
         public GameSystem Instance { get; private set; }
 
         private PlayerManager _player;
-        //private GridManager _grid;
         private GeneratorSettings _generator;
         private WorldMapperSettings _mapper;
 
         private List<Chunk> _generatedChunks = new List<Chunk>();
         private List<Chunk> _loadedChunks = new List<Chunk>();
         private Chunk _current;
-        private Chunk _northChunk = null;
-        private Chunk _eastChunk = null;
-        private Chunk _southChunk = null;
-        private Chunk _westChunk = null;
 
         void Awake()
         {
@@ -43,12 +37,6 @@ namespace IslandsOfRenguard.Scripts.Universal
         {
             _generator = new GeneratorSettings(1000, 1000, 0.05F, Random.Range(0.0F, 10000.0F), 16);
             _mapper = new WorldMapperSettings(80, 100, 200);
-
-            //var gridObj = GameObject.FindWithTag("Grid");
-            //if (gridObj != null)
-            //    _grid = gridObj.GetComponent<GridManager>();
-            //else
-            //    Debug.LogError("Could not find Grid Object");
 
             var playerObj = GameObject.FindWithTag("Player");
             if (playerObj != null)
@@ -68,57 +56,26 @@ namespace IslandsOfRenguard.Scripts.Universal
 
         }
 
+        /// <summary>
+        /// Event calls every time the player moves.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void OnMovement(object sender, EventArgs e)
         {
             _player.CheckMove(sender, e);
-            //_grid.Regenerate(sender, e);
-            DoChunkTest();
+            RegenChunks();
         }
 
         private void StartupGenerate()
         {
-            var blankChunk = new Chunk(0, 0, null, null);
-
-            _current = new Chunk(0, 0, _generator, _mapper);
-            _current.Generate();
-            _generatedChunks.Add(_current);
-            CheckChunk(_current, false, blankChunk);
-
-            var chunkId = _current.ID;
-
-            var northId = new Point((int)chunkId.X, (int)chunkId.Y + 1);
-            var eastId = new Point((int)chunkId.X + 1, (int)chunkId.Y);
-            var southId = new Point((int)chunkId.X, (int)chunkId.Y - 1);
-            var westId = new Point((int)chunkId.X - 1, (int)chunkId.Y);
-
-            
-
-            var newChunk = new Chunk(northId, _generator, _mapper);
-            _northChunk = newChunk;
-            _northChunk.Generate();
-            _generatedChunks.Add(_northChunk);
-            CheckChunk(_northChunk, false, blankChunk);
-
-            newChunk = new Chunk(eastId, _generator, _mapper);
-            _eastChunk = newChunk;
-            _eastChunk.Generate();
-            _generatedChunks.Add(_eastChunk);
-            CheckChunk(_eastChunk, false, blankChunk);
-
-            newChunk = new Chunk(southId, _generator, _mapper);
-            _southChunk = newChunk;
-            _southChunk.Generate();
-            _generatedChunks.Add(_southChunk);
-            CheckChunk(_southChunk, false, blankChunk);
-
-            newChunk = new Chunk(westId, _generator, _mapper);
-            _westChunk = newChunk;
-            _westChunk.Generate();
-            _generatedChunks.Add(_westChunk);
-            CheckChunk(_westChunk, false, blankChunk);
+            RegenChunks();
         }
 
-        private void DoChunkTest()
+        /// <summary>
+        /// Either generates or reloads chunks coming into view and unloads chunks going out of view.
+        /// </summary>
+        private void RegenChunks()
         {
             int posX = (int)_player.transform.position.x;
             int posY = (int)_player.transform.position.y;
@@ -132,110 +89,65 @@ namespace IslandsOfRenguard.Scripts.Universal
                 }
             }
 
-            var chunkId = _current.ID;
+            var topLeftDraw = new Point(posX - _player.ViewDis, posY + _player.ViewDis);
+            var bottomRightDraw = new Point(posX + _player.ViewDis, posY - _player.ViewDis);
 
-            var northId = new Point((int)chunkId.X, (int)chunkId.Y + 1);
-            var eastId = new Point((int)chunkId.X + 1, (int)chunkId.Y);
-            var southId = new Point((int)chunkId.X, (int)chunkId.Y - 1);
-            var westId = new Point((int)chunkId.X - 1, (int)chunkId.Y);
+            bool hasNewChunks = false;
 
-            _northChunk = _loadedChunks.GetChunk(northId);
-            _eastChunk = _loadedChunks.GetChunk(eastId);
-            _southChunk = _loadedChunks.GetChunk(southId);
-            _westChunk = _loadedChunks.GetChunk(westId);
-
-            
-            if (_northChunk == null)
+            List<Chunk> foundChunks = new List<Chunk>();
+            for (int y = (int)bottomRightDraw.Y; y < (int)topLeftDraw.Y; y++)
             {
-                var id = northId;
-
-                var exists = _generatedChunks.GetChunk(id) != null;
-                var newChunk = exists ? _generatedChunks.GetChunk(id) : new Chunk(id, _generator, _mapper);
-
-                _northChunk = newChunk;
-                _northChunk.Generate();
-
-                if (!exists)
+                for (int x = (int)topLeftDraw.X; x < (int)bottomRightDraw.X; x++)
                 {
-                    _generatedChunks.Add(_northChunk);
-                }
+                    if (_loadedChunks.GetChunkWithTile(x, y) != null)
+                    {
+                        foundChunks.Add(_loadedChunks.GetChunkWithTile(x, y));
+                        continue;
+                    }
 
-                CheckChunk(_northChunk, true, _southChunk);
+                    var id = new Point((int)Math.Floor(x / 16d), (int)Math.Floor(y / 16d));
+                    var exists = _generatedChunks.GetChunk(id) != null;
+                    var newChunk = exists ? _generatedChunks.GetChunk(id) : new Chunk(id, _generator, _mapper);
+                    if (!exists)
+                    {
+                        hasNewChunks = true;
+                        newChunk.Generate();
+                        _generatedChunks.Add(newChunk);
+                    }
+                    _loadedChunks.Add(newChunk);
+                    LoadChunk(newChunk);
+                    if (newChunk.Contains(posX, posY)) _current = newChunk;
+                }
             }
+            if (hasNewChunks) Debug.Log("Current Generated Chunks: " + _generatedChunks.Count);
 
-            if (_eastChunk == null)
+            List<Chunk> removeChunks = new List<Chunk>();
+            foreach (var chunk in _loadedChunks)
             {
-                var id = eastId;
-
-                var exists = _generatedChunks.GetChunk(id) != null;
-                var newChunk = exists ? _generatedChunks.GetChunk(id) : new Chunk(id, _generator, _mapper);
-
-                _eastChunk = newChunk;
-                _eastChunk.Generate();
-
-                if (!exists)
+                if (foundChunks.GetChunk(chunk.ID) == null)
                 {
-                    _generatedChunks.Add(_eastChunk);
+                    UnloadChunk(chunk);
+                    removeChunks.Add(chunk);
                 }
-
-                CheckChunk(_eastChunk, true, _westChunk);
             }
-
-            if (_southChunk == null)
+            foreach (var chunk in removeChunks)
             {
-                var id = southId;
-
-                var exists = _generatedChunks.GetChunk(id) != null;
-                var newChunk = exists ? _generatedChunks.GetChunk(id) : new Chunk(id, _generator, _mapper);
-
-                _southChunk = newChunk;
-                _southChunk.Generate();
-
-                if (!exists)
+                if (_loadedChunks.GetChunk(chunk.ID) != null)
                 {
-                    _generatedChunks.Add(_southChunk);
+                    _loadedChunks.Remove(chunk);
                 }
-
-                CheckChunk(_southChunk, true, _northChunk);
-            }
-
-            if (_westChunk == null)
-            {
-                var id = westId;
-
-                var exists = _generatedChunks.GetChunk(id) != null;
-                var newChunk = exists ? _generatedChunks.GetChunk(id) : new Chunk(id, _generator, _mapper);
-
-                _westChunk = newChunk;
-                _westChunk.Generate();
-
-                if (!exists)
-                {
-                    _generatedChunks.Add(_westChunk);
-                }
-
-                CheckChunk(_westChunk, true, _eastChunk);
             }
         }
 
-        private void CheckChunk(Chunk newChunk, bool deleteOldChunk, Chunk oldChunk)
-        {
-            newChunk.Generate();
-            _loadedChunks.Add(newChunk);
-            LoadChunk(newChunk);
-            if (deleteOldChunk && oldChunk != null)
-            {
-                UnloadChunk(oldChunk);
-                _loadedChunks.Remove(oldChunk);
-            }
-        }
-
+        /// <summary>
+        /// Loads the chunk into user viewable Objects.
+        /// </summary>
+        /// <param name="chunk">The chunk to load.</param>
         private void LoadChunk(Chunk chunk)
         {
             GameObject grassRef = (GameObject)Instantiate(Resources.Load("Tile_Env_Grass"));
             GameObject stoneRef = (GameObject)Instantiate(Resources.Load("Tile_Env_Stone"));
             GameObject waterRef = (GameObject)Instantiate(Resources.Load("Tile_Env_Water"));
-
 
             foreach (var tileList in chunk.Tiles)
             {
@@ -256,6 +168,10 @@ namespace IslandsOfRenguard.Scripts.Universal
             Destroy(waterRef);
         }
 
+        /// <summary>
+        /// Deletes all the user viewable Objects in a chunk.
+        /// </summary>
+        /// <param name="chunk">The chunk to unload.</param>
         private void UnloadChunk(Chunk chunk)
         {
             foreach (var obj in chunk.Objects)
