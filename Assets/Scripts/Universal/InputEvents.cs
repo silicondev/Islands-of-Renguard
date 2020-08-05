@@ -11,93 +11,65 @@ namespace IslandsOfRenguard.Scripts.Universal
 
         private void Update()
         {
-            //if (CheckKey(KeyCode.W))
-            //{
-            //    OnWPressed?.Invoke(this, EventArgs.Empty);
-            //    KeyEventArgs args = new KeyEventArgs(KeyCode.W);
-            //    OnKeyPressed?.Invoke(this, args);
-            //    OnMovementKeyPressed?.Invoke(this, args);
-            //}
-            //if (CheckKey(KeyCode.A))
-            //{
-            //    OnAPressed?.Invoke(this, EventArgs.Empty);
-            //    KeyEventArgs args = new KeyEventArgs(KeyCode.A);
-            //    OnKeyPressed?.Invoke(this, args);
-            //    OnMovementKeyPressed?.Invoke(this, args);
-            //}
-            //if (CheckKey(KeyCode.S))
-            //{
-            //    OnSPressed?.Invoke(this, EventArgs.Empty);
-            //    KeyEventArgs args = new KeyEventArgs(KeyCode.S);
-            //    OnKeyPressed?.Invoke(this, args);
-            //    OnMovementKeyPressed?.Invoke(this, args);
-            //}
-            //if (CheckKey(KeyCode.D))
-            //{
-            //    OnDPressed?.Invoke(this, EventArgs.Empty);
-            //    KeyEventArgs args = new KeyEventArgs(KeyCode.D);
-            //    OnKeyPressed?.Invoke(this, args);
-            //    OnMovementKeyPressed?.Invoke(this, args);
-            //}
-            //if (CheckKey(KeyCode.Space))
-            //{
-            //    OnSpacePressed?.Invoke(this, EventArgs.Empty);
-            //    KeyEventArgs args = new KeyEventArgs(KeyCode.Space);
-            //    OnKeyPressed?.Invoke(this, args);
-            //}
-
-            if (CheckKeyBasic(KeyCode.W))
+            if (CheckKey(KeyCode.W))
             {
                 OnWPressed?.Invoke(this, EventArgs.Empty);
                 KeyEventArgs args = new KeyEventArgs(KeyCode.W);
                 OnKeyPressed?.Invoke(this, args);
                 OnMovementKeyPressed?.Invoke(this, args);
             }
-            if (CheckKeyBasic(KeyCode.A))
+            if (CheckKey(KeyCode.A))
             {
                 OnAPressed?.Invoke(this, EventArgs.Empty);
                 KeyEventArgs args = new KeyEventArgs(KeyCode.A);
                 OnKeyPressed?.Invoke(this, args);
                 OnMovementKeyPressed?.Invoke(this, args);
             }
-            if (CheckKeyBasic(KeyCode.S))
+            if (CheckKey(KeyCode.S))
             {
                 OnSPressed?.Invoke(this, EventArgs.Empty);
                 KeyEventArgs args = new KeyEventArgs(KeyCode.S);
                 OnKeyPressed?.Invoke(this, args);
                 OnMovementKeyPressed?.Invoke(this, args);
             }
-            if (CheckKeyBasic(KeyCode.D))
+            if (CheckKey(KeyCode.D))
             {
                 OnDPressed?.Invoke(this, EventArgs.Empty);
                 KeyEventArgs args = new KeyEventArgs(KeyCode.D);
                 OnKeyPressed?.Invoke(this, args);
                 OnMovementKeyPressed?.Invoke(this, args);
             }
-            if (CheckKeyBasic(KeyCode.Space))
+            if (CheckKey(KeyCode.Space))
             {
                 OnSpacePressed?.Invoke(this, EventArgs.Empty);
                 KeyEventArgs args = new KeyEventArgs(KeyCode.Space);
                 OnKeyPressed?.Invoke(this, args);
             }
+
+            var scrollDelta = Input.GetAxis("Mouse ScrollWheel");
+            if (scrollDelta != 0.0F)
+            {
+                ScrollEventArgs args;
+                if (scrollDelta > 0.0F)
+                {
+                    args = new ScrollEventArgs(true);
+                    OnScrollUp?.Invoke(this, EventArgs.Empty);
+                }
+                else
+                {
+                    args = new ScrollEventArgs(false);
+                    OnScrollDown?.Invoke(this, EventArgs.Empty);
+                }
+                OnScroll?.Invoke(this, args);
+            }
         }
 
-        private void CheckKeyUp(KeyCode key)
+        private bool CheckKeySingle(KeyCode key)
         {
-            if (Input.GetKeyUp(key))
-                _isKeyPressed[key] = false;
+            return Input.GetKeyDown(key);
         }
 
         private bool CheckKey(KeyCode key)
-        {
-            if (!_isKeyPressed.ContainsKey(key)) _isKeyPressed[key] = false;
-            CheckKeyUp(key);
-            bool val = Input.GetKeyDown(key) && !_isKeyPressed[key];
-            if (val) _isKeyPressed[key] = true;
-            return val;
-        }
-
-        private bool CheckKeyBasic(KeyCode key)
         {
             if (!_isKeyPressed.ContainsKey(key)) _isKeyPressed[key] = false;
             if (Input.GetKeyDown(key)) _isKeyPressed[key] = true;
@@ -112,6 +84,9 @@ namespace IslandsOfRenguard.Scripts.Universal
         public event EventHandler OnSpacePressed;
         public event EventHandler OnKeyPressed;
         public event EventHandler OnMovementKeyPressed;
+        public event EventHandler OnScroll;
+        public event EventHandler OnScrollUp;
+        public event EventHandler OnScrollDown;
     }
 
     public class KeyEventArgs : EventArgs
@@ -121,6 +96,16 @@ namespace IslandsOfRenguard.Scripts.Universal
         public KeyEventArgs(KeyCode key)
         {
             KeyPressed = key;
+        }
+    }
+
+    public class ScrollEventArgs : EventArgs
+    {
+        public bool IsUp { get; }
+
+        public ScrollEventArgs(bool isUp)
+        {
+            IsUp = isUp;
         }
     }
 }

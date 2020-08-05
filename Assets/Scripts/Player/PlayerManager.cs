@@ -8,24 +8,46 @@ namespace IslandsOfRenguard.Scripts.Player
 {
     public class PlayerManager : MonoBehaviour
     {
+        private float _defaultZoom = 7F;
+        private float _defaultMoveSpeed = 0.2F;
+        private int _viewDisModX = 18;
+        private int _viewDisModY = 9;
+
+
         public bool CanMove { get; set; } = true;
-        //public Point Location { get; set; }
-        public int ViewDis { get; private set; } = 20;
-        public float MoveSpeed { get; private set; } = 0.3F;
+        public Point ViewDis { 
+            get 
+            {
+                var zoomMod = (CurrentZoom / _defaultZoom);
+                return new Point((int)(_viewDisModX * zoomMod), (int)(_viewDisModY * zoomMod));
+            }        
+        }
+        public float MoveSpeed { 
+            get
+            {
+                return (_defaultMoveSpeed / _defaultZoom) * CurrentZoom;
+            }
+        }
+        public float ZoomSpeed { get; private set; } = 0.7F;
+        public float SmoothSpeed { get; private set; } = 10.0F;
+        public float MinZoom { get; private set; } = 1.0F;
+        public float MaxZoom { get; private set; } = 15.0F;
+        public float TargetZoom { get; private set; }
+        public float CurrentZoom => Camera.main.orthographicSize;
 
         // Start is called before the first frame update
         void Start()
         {
-
+            TargetZoom = _defaultZoom;
         }
 
         // Update is called once per frame
         void Update()
         {
-
+            Camera.main.orthographicSize = Mathf.MoveTowards(Camera.main.orthographicSize, TargetZoom, SmoothSpeed * Time.deltaTime);
         }
 
-        public void CheckMove(object sender, EventArgs args)
+        public void OnMove(object sender, EventArgs args)
         {
             KeyEventArgs e = (KeyEventArgs)args;
             if (CanMove)
@@ -46,6 +68,14 @@ namespace IslandsOfRenguard.Scripts.Player
                         break;
                 }
             }
+        }
+
+        public void OnScroll(object sender, EventArgs args)
+        {
+            ScrollEventArgs e = (ScrollEventArgs)args;
+
+            TargetZoom -= e.IsUp ? ZoomSpeed : ZoomSpeed / -1;
+            TargetZoom = Mathf.Clamp(TargetZoom, MinZoom, MaxZoom);
         }
 
         private void Move(float x, float y)

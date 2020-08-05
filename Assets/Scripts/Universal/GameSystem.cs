@@ -34,7 +34,8 @@ namespace IslandsOfRenguard.Scripts.Universal
         // Start is called before the first frame update
         void Start()
         {
-            var seed = Random.Range(0.0F, 10000.0F);
+            //var seed = Random.Range(0.0F, 10000.0F);
+            var seed = 1125.624F;
             _mapper = new WorldMapperSettings(80, 100, 105, 200);
             _generator = new Generator(0.01F, seed, 16, new WorldMapper(_mapper));
             Debug.Log("Seed: " + seed.ToString());
@@ -49,6 +50,7 @@ namespace IslandsOfRenguard.Scripts.Universal
 
             InputEvents input = GetComponent<InputEvents>();
             input.OnMovementKeyPressed += OnMovement;
+            input.OnScroll += OnScroll;
         }
 
         // Update is called once per frame
@@ -64,7 +66,13 @@ namespace IslandsOfRenguard.Scripts.Universal
         /// <param name="e"></param>
         private void OnMovement(object sender, EventArgs e)
         {
-            _player.CheckMove(sender, e);
+            _player.OnMove(sender, e);
+            RegenChunks();
+        }
+
+        private void OnScroll(object sender, EventArgs e)
+        {
+            _player.OnScroll(sender, e);
             RegenChunks();
         }
 
@@ -90,8 +98,8 @@ namespace IslandsOfRenguard.Scripts.Universal
                 }
             }
 
-            var topLeftDraw = new Point(posX - _player.ViewDis, posY + _player.ViewDis);
-            var bottomRightDraw = new Point(posX + _player.ViewDis, posY - _player.ViewDis);
+            var topLeftDraw = new Point(posX - _player.ViewDis.X, posY + _player.ViewDis.Y);
+            var bottomRightDraw = new Point(posX + _player.ViewDis.X, posY - _player.ViewDis.Y);
 
             bool hasNewChunks = false;
 
@@ -190,10 +198,10 @@ namespace IslandsOfRenguard.Scripts.Universal
                     obj.name = obj.name.Substring(0, obj.name.Length - 14);
                     if (loadOverlay) overlayObj.name = overlayObj.name.Substring(0, overlayObj.name.Length - 14);
 
-                    obj.transform.position = new Vector2(tile.Location.X + 0.5F, tile.Location.Y + 0.5F);
+                    obj.transform.position = new Vector3(tile.Location.X + 0.5F, tile.Location.Y + 0.5F, 0);
 
                     if (loadOverlay)
-                        overlayObj.transform.position = new Vector2(overlay.Location.X + 0.5F, overlay.Location.Y + 0.5F);
+                        overlayObj.transform.position = new Vector3(overlay.Location.X + 0.5F, overlay.Location.Y + 0.5F, -0.1F);
                     else
                         Destroy(overlayObj);
 
