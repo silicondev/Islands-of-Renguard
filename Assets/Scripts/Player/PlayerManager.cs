@@ -11,6 +11,7 @@ namespace IslandsOfRenguard.Scripts.Player
         public bool CanMove { get; set; } = true;
         //public Point Location { get; set; }
         public int ViewDis { get; private set; } = 20;
+        public float MoveSpeed { get; private set; } = 0.3F;
 
         // Start is called before the first frame update
         void Start()
@@ -32,16 +33,16 @@ namespace IslandsOfRenguard.Scripts.Player
                 switch (e.KeyPressed)
                 {
                     case KeyCode.W:
-                        Move(0, 1);
+                        Move(0, MoveSpeed);
                         break;
                     case KeyCode.A:
-                        Move(-1, 0);
+                        Move(MoveSpeed / -1, 0);
                         break;
                     case KeyCode.S:
-                        Move(0, -1);
+                        Move(0, MoveSpeed / -1);
                         break;
                     case KeyCode.D:
-                        Move(1, 0);
+                        Move(MoveSpeed, 0);
                         break;
                 }
             }

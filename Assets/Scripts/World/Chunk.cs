@@ -33,6 +33,7 @@ namespace IslandsOfRenguard.Assets.Scripts.World
 
         private Generator _generator;
         public List<List<Tile>> Tiles { get; private set; } = new List<List<Tile>>();
+        public List<List<Overlay>> Overlays { get; private set; } = new List<List<Overlay>>();
         public List<GameObject> Objects { get; set; } = new List<GameObject>();
 
         public Chunk(int x, int y, Generator gen)
@@ -54,7 +55,9 @@ namespace IslandsOfRenguard.Assets.Scripts.World
 
         public void Generate()
         {
-            Tiles = _generator.GenerateChunk(ID);
+            var gen = _generator.GenerateChunk(ID);
+            Tiles = gen.Item1;
+            Overlays = gen.Item2;
         }
         
         public bool Contains(int x, int y) => 

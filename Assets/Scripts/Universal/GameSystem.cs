@@ -158,11 +158,19 @@ namespace IslandsOfRenguard.Scripts.Universal
             GameObject waterRef = (GameObject)Instantiate(Resources.Load("Tile_Env_Water"));
             GameObject sandRef = (GameObject)Instantiate(Resources.Load("Tile_Env_Sand"));
 
-            foreach (var tileList in chunk.Tiles)
+            GameObject treeRef = (GameObject)Instantiate(Resources.Load("Overlay_Env_Tree"));
+
+            for (int y = 0; y < chunk.Tiles.Count; y++)
             {
-                foreach (var tile in tileList)
+                //foreach (var tile in tileList)
+                for (int x = 0; x < chunk.Tiles[y].Count; x++)
                 {
+                    var tile = chunk.Tiles[x][y];
+                    var overlay = chunk.Overlays[x][y];
+
                     GameObject obj;
+                    GameObject overlayObj = null;
+                    var loadOverlay = false;
 
                     if (tile.ID == TileID.ENV.STONE)
                         obj = Instantiate(stoneRef, transform);
@@ -173,10 +181,24 @@ namespace IslandsOfRenguard.Scripts.Universal
                     else
                         obj = Instantiate(grassRef, transform);
 
+                    if (overlay.ID == TileID.ENV_OVERLAY.TREE)
+                    {
+                        loadOverlay = true;
+                        overlayObj = Instantiate(treeRef, transform);
+                    }
+
                     obj.name = obj.name.Substring(0, obj.name.Length - 14);
+                    if (loadOverlay) overlayObj.name = overlayObj.name.Substring(0, overlayObj.name.Length - 14);
 
                     obj.transform.position = new Vector2(tile.Location.X + 0.5F, tile.Location.Y + 0.5F);
+
+                    if (loadOverlay)
+                        overlayObj.transform.position = new Vector2(overlay.Location.X + 0.5F, overlay.Location.Y + 0.5F);
+                    else
+                        Destroy(overlayObj);
+
                     chunk.Objects.Add(obj);
+                    chunk.Objects.Add(overlayObj);
                 }
             }
 
@@ -184,6 +206,8 @@ namespace IslandsOfRenguard.Scripts.Universal
             Destroy(stoneRef);
             Destroy(waterRef);
             Destroy(sandRef);
+
+            Destroy(treeRef);
         }
 
         /// <summary>

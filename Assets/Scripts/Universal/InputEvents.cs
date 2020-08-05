@@ -11,35 +11,70 @@ namespace IslandsOfRenguard.Scripts.Universal
 
         private void Update()
         {
-            if (CheckKey(KeyCode.W))
+            //if (CheckKey(KeyCode.W))
+            //{
+            //    OnWPressed?.Invoke(this, EventArgs.Empty);
+            //    KeyEventArgs args = new KeyEventArgs(KeyCode.W);
+            //    OnKeyPressed?.Invoke(this, args);
+            //    OnMovementKeyPressed?.Invoke(this, args);
+            //}
+            //if (CheckKey(KeyCode.A))
+            //{
+            //    OnAPressed?.Invoke(this, EventArgs.Empty);
+            //    KeyEventArgs args = new KeyEventArgs(KeyCode.A);
+            //    OnKeyPressed?.Invoke(this, args);
+            //    OnMovementKeyPressed?.Invoke(this, args);
+            //}
+            //if (CheckKey(KeyCode.S))
+            //{
+            //    OnSPressed?.Invoke(this, EventArgs.Empty);
+            //    KeyEventArgs args = new KeyEventArgs(KeyCode.S);
+            //    OnKeyPressed?.Invoke(this, args);
+            //    OnMovementKeyPressed?.Invoke(this, args);
+            //}
+            //if (CheckKey(KeyCode.D))
+            //{
+            //    OnDPressed?.Invoke(this, EventArgs.Empty);
+            //    KeyEventArgs args = new KeyEventArgs(KeyCode.D);
+            //    OnKeyPressed?.Invoke(this, args);
+            //    OnMovementKeyPressed?.Invoke(this, args);
+            //}
+            //if (CheckKey(KeyCode.Space))
+            //{
+            //    OnSpacePressed?.Invoke(this, EventArgs.Empty);
+            //    KeyEventArgs args = new KeyEventArgs(KeyCode.Space);
+            //    OnKeyPressed?.Invoke(this, args);
+            //}
+
+            if (CheckKeyBasic(KeyCode.W))
             {
                 OnWPressed?.Invoke(this, EventArgs.Empty);
                 KeyEventArgs args = new KeyEventArgs(KeyCode.W);
                 OnKeyPressed?.Invoke(this, args);
                 OnMovementKeyPressed?.Invoke(this, args);
             }
-            if (CheckKey(KeyCode.A))
+            if (CheckKeyBasic(KeyCode.A))
             {
                 OnAPressed?.Invoke(this, EventArgs.Empty);
                 KeyEventArgs args = new KeyEventArgs(KeyCode.A);
                 OnKeyPressed?.Invoke(this, args);
                 OnMovementKeyPressed?.Invoke(this, args);
             }
-            if (CheckKey(KeyCode.S))
+            if (CheckKeyBasic(KeyCode.S))
             {
                 OnSPressed?.Invoke(this, EventArgs.Empty);
                 KeyEventArgs args = new KeyEventArgs(KeyCode.S);
                 OnKeyPressed?.Invoke(this, args);
                 OnMovementKeyPressed?.Invoke(this, args);
             }
-            if (CheckKey(KeyCode.D))
+            if (CheckKeyBasic(KeyCode.D))
             {
                 OnDPressed?.Invoke(this, EventArgs.Empty);
                 KeyEventArgs args = new KeyEventArgs(KeyCode.D);
                 OnKeyPressed?.Invoke(this, args);
                 OnMovementKeyPressed?.Invoke(this, args);
             }
-            if (CheckKey(KeyCode.Space))
+            if (CheckKeyBasic(KeyCode.Space))
             {
                 OnSpacePressed?.Invoke(this, EventArgs.Empty);
                 KeyEventArgs args = new KeyEventArgs(KeyCode.Space);
@@ -60,6 +95,14 @@ namespace IslandsOfRenguard.Scripts.Universal
             bool val = Input.GetKeyDown(key) && !_isKeyPressed[key];
             if (val) _isKeyPressed[key] = true;
             return val;
+        }
+
+        private bool CheckKeyBasic(KeyCode key)
+        {
+            if (!_isKeyPressed.ContainsKey(key)) _isKeyPressed[key] = false;
+            if (Input.GetKeyDown(key)) _isKeyPressed[key] = true;
+            if (Input.GetKeyUp(key)) _isKeyPressed[key] = false;
+            return _isKeyPressed[key];
         }
 
         public event EventHandler OnWPressed;
