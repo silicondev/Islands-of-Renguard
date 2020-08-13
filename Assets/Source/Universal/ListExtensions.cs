@@ -1,5 +1,5 @@
-﻿using IslandsOfRenguard.Base;
-using IslandsOfRenguard.World;
+﻿using dEvine_and_conquer.Base;
+using dEvine_and_conquer.World;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +7,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IslandsOfRenguard.Universal
+namespace dEvine_and_conquer.Universal
 {
     public static class ListExtensions
     {

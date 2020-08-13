@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IslandsOfRenguard.Base
+namespace dEvine_and_conquer.Base
 {
     public struct ID : IEquatable<ID>
     {

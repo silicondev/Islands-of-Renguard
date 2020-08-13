@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace IslandsOfRenguard.Base
+namespace dEvine_and_conquer.Base
 {
     public class Point : IEquatable<Point>
     {

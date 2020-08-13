@@ -1,9 +1,9 @@
-﻿using IslandsOfRenguard.Base;
-using IslandsOfRenguard.World;
+﻿using dEvine_and_conquer.Base;
+using dEvine_and_conquer.World;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace IslandsOfRenguard.AI.Pathfinding.Interfaces
+namespace dEvine_and_conquer.AI.Pathfinding.Interfaces
 {
     public interface IPathfinder
     {

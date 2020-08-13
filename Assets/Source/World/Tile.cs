@@ -1,4 +1,4 @@
-﻿using IslandsOfRenguard.Base;
+﻿using dEvine_and_conquer.Base;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEditor.PackageManager;
 
-namespace IslandsOfRenguard.World
+namespace dEvine_and_conquer.World
 {
     public static class TileID
     {

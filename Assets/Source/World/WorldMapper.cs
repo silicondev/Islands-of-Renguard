@@ -1,10 +1,10 @@
-﻿using IslandsOfRenguard.Base;
+﻿using dEvine_and_conquer.Base;
 using System.Collections;
 using System.Collections.Generic;
 using System.Security.Cryptography.X509Certificates;
 using UnityEngine;
 
-namespace IslandsOfRenguard.World
+namespace dEvine_and_conquer.World
 {
     public class WorldMapper
     {

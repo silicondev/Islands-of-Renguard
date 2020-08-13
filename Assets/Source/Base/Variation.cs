@@ -1,4 +1,4 @@
-﻿using IslandsOfRenguard.Base;
+﻿using dEvine_and_conquer.Base;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TMPro;
 
-namespace IslandsOfRenguard.Base
+namespace dEvine_and_conquer.Base
 {
     public class Variation
     {

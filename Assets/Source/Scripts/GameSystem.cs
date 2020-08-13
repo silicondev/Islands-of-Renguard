@@ -1,13 +1,13 @@
-﻿using IslandsOfRenguard.Base;
-using IslandsOfRenguard.Universal;
-using IslandsOfRenguard.World;
+﻿using dEvine_and_conquer.Base;
+using dEvine_and_conquer.Universal;
+using dEvine_and_conquer.World;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-namespace IslandsOfRenguard.Scripts
+namespace dEvine_and_conquer.Scripts
 {
     public class GameSystem : MonoBehaviour
     {

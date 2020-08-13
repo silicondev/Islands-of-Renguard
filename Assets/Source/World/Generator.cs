@@ -1,4 +1,4 @@
-﻿using IslandsOfRenguard.Base;
+﻿using dEvine_and_conquer.Base;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +8,7 @@ using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-namespace IslandsOfRenguard.World
+namespace dEvine_and_conquer.World
 {
     public class Generator
     {

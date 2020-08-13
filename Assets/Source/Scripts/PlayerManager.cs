@@ -1,10 +1,10 @@
-﻿using IslandsOfRenguard.Base;
+﻿using dEvine_and_conquer.Base;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace IslandsOfRenguard.Scripts
+namespace dEvine_and_conquer.Scripts
 {
     public class PlayerManager : MonoBehaviour
     {

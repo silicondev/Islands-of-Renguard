@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IslandsOfRenguard.World
+namespace dEvine_and_conquer.World
 {
     public class WorldMapperSettings
     {

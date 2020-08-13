@@ -1,11 +1,11 @@
-﻿using IslandsOfRenguard.World;
+﻿using dEvine_and_conquer.World;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Assets.Source.AI.Pathfinding.AStar
+namespace dEvine_and_conquer.AI.Pathfinding.AStar
 {
     internal class AStarTile
     {
