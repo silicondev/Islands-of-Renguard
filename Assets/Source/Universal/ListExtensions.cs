@@ -64,5 +64,36 @@ namespace dEvine_and_conquer.Universal
         {
             return chunks.GetChunkWithTile(new Point(x, y));
         }
+
+        public static Tile GetTileFromID(this List<Chunk> chunks, Point id)
+        {
+            var x = (int)id.X;
+            var y = (int)id.Y;
+
+            foreach (var chunk in chunks)
+            {
+                var tiles = chunk.Tiles;
+                if (tiles == null || tiles.Value[0] == null || tiles.Value[0][0] == null)
+                    continue;
+
+                var chunkX = (int)chunk.ID.X * 16;
+                var chunkY = (int)chunk.ID.Y * 16;
+
+                if (x >= chunkX && x < chunkX + 16 && y >= chunkY && y < chunkY + 16)
+                {
+                    var tileX = (int)id.X - chunkX;
+                    var tileY = (int)id.Y - chunkY;
+
+                    return tiles.Value[tileX][tileY];
+                }
+            }
+
+            return null;
+        }
+
+        public static Tile GetTileFromID(this List<Chunk> chunks, int x, int y)
+        {
+            return chunks.GetTileFromID(new Point(x, y));
+        }
     }
 }

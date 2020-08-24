@@ -1,4 +1,5 @@
-﻿using dEvine_and_conquer.Base;
+﻿using Assets.Source.Universal;
+using dEvine_and_conquer.Base;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,8 +32,8 @@ namespace dEvine_and_conquer.World
         }
 
         private Generator _generator;
-        public List<List<Tile>> Tiles { get; private set; } = new List<List<Tile>>();
-        public List<List<Overlay>> Overlays { get; private set; } = new List<List<Overlay>>();
+        public XYContainer<Tile> Tiles { get; private set; } = new List<List<Tile>>();
+        public XYContainer<Overlay> Overlays { get; private set; } = new List<List<Overlay>>();
         public List<GameObject> Objects { get; set; } = new List<GameObject>();
 
         public Chunk(int x, int y, Generator gen)
@@ -55,8 +56,8 @@ namespace dEvine_and_conquer.World
         public void Generate()
         {
             var gen = _generator.GenerateChunk(ID);
-            Tiles = gen.Item1;
-            Overlays = gen.Item2;
+            Tiles = gen.Tiles;
+            Overlays = gen.Overlays;
         }
         
         public bool Contains(int x, int y) => 

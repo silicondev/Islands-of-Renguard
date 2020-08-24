@@ -21,6 +21,8 @@ namespace dEvine_and_conquer.Scripts
         private List<Chunk> _loadedChunks = new List<Chunk>();
         private Chunk _current;
 
+        public Tile CurrentTile => _loadedChunks.GetTileFromID(new Point((int)Math.Floor(_player.Location.X), (int)Math.Floor(_player.Location.Y)));
+        public Tile StartTile = null;
         void Awake()
         {
             Instance = this;
@@ -34,7 +36,7 @@ namespace dEvine_and_conquer.Scripts
         // Start is called before the first frame update
         void Start()
         {
-            var seed = Random.Range(0.0F, 10000.0F);
+            var seed = Random.Range(0.0F, 10000000.0F);
             _mapper = new WorldMapperSettings(80, 100, 105, 200);
             _generator = new Generator(0.01F, seed, 16, new WorldMapper(_mapper));
             Debug.Log("Seed: " + seed.ToString());
@@ -78,6 +80,12 @@ namespace dEvine_and_conquer.Scripts
         private void StartupGenerate()
         {
             RegenChunks();
+            StartTile = CurrentTile;
+        }
+
+        private void GeneratePath()
+        {
+
         }
 
         /// <summary>
@@ -85,8 +93,8 @@ namespace dEvine_and_conquer.Scripts
         /// </summary>
         private void RegenChunks()
         {
-            int posX = (int)_player.transform.position.x;
-            int posY = (int)_player.transform.position.y;
+            int posX = (int)_player.Location.X;
+            int posY = (int)_player.Location.Y;
 
             foreach (var chunk in _loadedChunks)
             {
@@ -167,13 +175,13 @@ namespace dEvine_and_conquer.Scripts
 
             GameObject treeRef = (GameObject)Instantiate(Resources.Load("Overlay_Env_Tree"));
 
-            for (int y = 0; y < chunk.Tiles.Count; y++)
+            for (int y = 0; y < chunk.Tiles.Value.Count; y++)
             {
                 //foreach (var tile in tileList)
-                for (int x = 0; x < chunk.Tiles[y].Count; x++)
+                for (int x = 0; x < chunk.Tiles.Value[y].Count; x++)
                 {
-                    var tile = chunk.Tiles[x][y];
-                    var overlay = chunk.Overlays[x][y];
+                    var tile = chunk.Tiles.Value[x][y];
+                    var overlay = chunk.Overlays.Value[x][y];
 
                     GameObject obj;
                     GameObject overlayObj = null;

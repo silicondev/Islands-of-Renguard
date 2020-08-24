@@ -1,4 +1,5 @@
-﻿using dEvine_and_conquer.AI.Pathfinding.Interfaces;
+﻿using Assets.Source.Universal;
+using dEvine_and_conquer.AI.Pathfinding.Interfaces;
 using dEvine_and_conquer.Base;
 using dEvine_and_conquer.World;
 using System;
@@ -17,11 +18,11 @@ namespace dEvine_and_conquer.AI.Pathfinding.AStar
         private List<AStarTile> _path = new List<AStarTile>();
         private AStarTile _start;
         private AStarTile _end;
-        private int _cols => _tiles.Count();
-        private int _rows => _tiles[0].Count();
-        private List<List<Tile>> _tiles;
-        private List<List<AStarTile>> _gridHold;
-        private List<List<AStarTile>> _grid
+        private int _cols => _tiles.Value.Count();
+        private int _rows => _tiles.Value[0].Count();
+        private XYContainer<Tile> _tiles;
+        private XYContainer<AStarTile> _gridHold;
+        private XYContainer<AStarTile> _grid
         {
             get
             {
@@ -34,7 +35,7 @@ namespace dEvine_and_conquer.AI.Pathfinding.AStar
                         tmp.Add(new List<AStarTile>());
                         for (int x = 0; x < _cols; x++)
                         {
-                            var tile = new AStarTile(_tiles[x][y]);
+                            var tile = new AStarTile(_tiles.Value[x][y]);
                             tmp[y].Add(tile);
                         }
                     }
@@ -52,7 +53,7 @@ namespace dEvine_and_conquer.AI.Pathfinding.AStar
 
         public List<Tile> GetPath(Point start, Point end)
         {
-            if (_tiles == null || _tiles[0] == null || _tiles[0][0] == null)
+            if (_tiles == null || _tiles.Value[0] == null || _tiles.Value[0][0] == null)
                 return null;
 
             _openSet.Clear();
@@ -62,7 +63,7 @@ namespace dEvine_and_conquer.AI.Pathfinding.AStar
             {
                 for (int x = 0; x < _cols; x++)
                 {
-                    var tile = _grid[x][y];
+                    var tile = _grid.Value[x][y];
 
                     var pnt = new Point(x, y);
                     if (pnt == start)
@@ -111,7 +112,7 @@ namespace dEvine_and_conquer.AI.Pathfinding.AStar
                 {
                     for (int x = 0; x < _cols; x++)
                     {
-                        _grid[x][y].RefreshLocal(_grid);
+                        _grid.Value[x][y].RefreshLocal(_grid);
                     }
                 }
 

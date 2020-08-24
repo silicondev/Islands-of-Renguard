@@ -11,8 +11,7 @@ namespace dEvine_and_conquer.Scripts
         private float _defaultZoom = 7F;
         private float _defaultMoveSpeed = 0.2F;
         private int _viewDisModX = 18;
-        private int _viewDisModY = 9;
-
+        private int _viewDisModY = 18;
 
         public bool CanMove { get; set; } = true;
         public Point ViewDis { 
@@ -22,18 +21,19 @@ namespace dEvine_and_conquer.Scripts
                 return new Point((int)(_viewDisModX * zoomMod), (int)(_viewDisModY * zoomMod));
             }        
         }
-        public float MoveSpeed { 
-            get
-            {
-                return (_defaultMoveSpeed / _defaultZoom) * CurrentZoom;
-            }
-        }
+        public float MoveSpeed => (_defaultMoveSpeed / _defaultZoom) * CurrentZoom;
         public float ZoomSpeed { get; private set; } = 0.7F;
         public float SmoothSpeed { get; private set; } = 10.0F;
         public float MinZoom { get; private set; } = 1.0F;
         public float MaxZoom { get; private set; } = 15.0F;
         public float TargetZoom { get; private set; }
         public float CurrentZoom => Camera.main.orthographicSize;
+        public Point Location => new Point((int)Math.Floor(transform.position.x), (int)Math.Floor(transform.position.y));
+
+        private void MoveUp() => Move(MoveSpeed, MoveSpeed);
+        private void MoveRight() => Move(MoveSpeed, MoveSpeed / -1);
+        private void MoveLeft() => Move(MoveSpeed / -1, MoveSpeed);
+        private void MoveDown() => Move(MoveSpeed / -1, MoveSpeed / -1);
 
         // Start is called before the first frame update
         void Start()
@@ -55,16 +55,16 @@ namespace dEvine_and_conquer.Scripts
                 switch (e.KeyPressed)
                 {
                     case KeyCode.W:
-                        Move(0, MoveSpeed);
+                        MoveUp();
                         break;
                     case KeyCode.A:
-                        Move(MoveSpeed / -1, 0);
+                        MoveLeft();
                         break;
                     case KeyCode.S:
-                        Move(0, MoveSpeed / -1);
+                        MoveDown();
                         break;
                     case KeyCode.D:
-                        Move(MoveSpeed, 0);
+                        MoveRight();
                         break;
                 }
             }
@@ -78,11 +78,6 @@ namespace dEvine_and_conquer.Scripts
             TargetZoom = Mathf.Clamp(TargetZoom, MinZoom, MaxZoom);
         }
 
-        private void Move(float x, float y)
-        {
-            float newX = transform.position.x + x;
-            float newY = transform.position.y + y;
-            transform.position = new Vector3(newX, newY, -1.5F);
-        }
+        private void Move(float x, float y) => transform.position = new Vector3(transform.position.x + x, transform.position.y + y, -1.5F);
     }
 }
