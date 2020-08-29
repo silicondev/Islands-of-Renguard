@@ -1,25 +1,25 @@
 fileFormatVersion: 2
-guid: 83e60f35b4dcd9b4da8a9b4c8f880981
+guid: 83d05f00776322d468755a742417c5af
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 8150035955682067254
-    second: env_grass
+      213: 2825462552424892040
+    second: env_overlay_tree
   - first:
-      213: -6188809799970177618
-    second: env_rock
+      213: 4287194752880040719
+    second: env_overlay_chest
   - first:
-      213: -8220203401478379151
-    second: env_sand
+      213: 6665885644044440600
+    second: env_overlay_ore_iron
   - first:
-      213: -7960637912954951512
-    second: env_stone
+      213: 5740790190066121677
+    second: env_overlay_ore_silver
   - first:
-      213: -1144274145806337209
-    second: env_cave
+      213: -7532247143047761945
+    second: env_overlay_ore_gold
   - first:
-      213: -562821662386138964
-    second: env_water
+      213: 8172779032611419586
+    second: env_overlay_ore_diamond
   externalObjects: {}
   serializedVersion: 11
   mipmaps:
@@ -105,7 +105,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: env_grass
+      name: env_overlay_tree
       rect:
         serializedVersion: 2
         x: 0
@@ -119,14 +119,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 633471d558eba1170800000000000000
-      internalID: 8150035955682067254
+      spriteID: 8864473b83f063720800000000000000
+      internalID: 2825462552424892040
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: env_rock
+      name: env_overlay_chest
       rect:
         serializedVersion: 2
         x: 16
@@ -140,14 +140,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: ead3252d64eec1aa0800000000000000
-      internalID: -6188809799970177618
+      spriteID: f0b5558c9ec2f7b30800000000000000
+      internalID: 4287194752880040719
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: env_sand
+      name: env_overlay_ore_iron
       rect:
         serializedVersion: 2
         x: 32
@@ -161,14 +161,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 1796c611f88fbed80800000000000000
-      internalID: -8220203401478379151
+      spriteID: 81415a60dabf18c50800000000000000
+      internalID: 6665885644044440600
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: env_stone
+      name: env_overlay_ore_silver
       rect:
         serializedVersion: 2
         x: 0
@@ -182,14 +182,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 8a820d4def1268190800000000000000
-      internalID: -7960637912954951512
+      spriteID: dcb30f803426baf40800000000000000
+      internalID: 5740790190066121677
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: env_cave
+      name: env_overlay_ore_gold
       rect:
         serializedVersion: 2
         x: 16
@@ -203,14 +203,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 74bbc8d1ab8be10f0800000000000000
-      internalID: -1144274145806337209
+      spriteID: 7efef268125187790800000000000000
+      internalID: -7532247143047761945
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: env_water
+      name: env_overlay_ore_diamond
       rect:
         serializedVersion: 2
         x: 32
@@ -224,8 +224,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: ca054951ea47038f0800000000000000
-      internalID: -562821662386138964
+      spriteID: 2c5709a9a3b8b6170800000000000000
+      internalID: 8172779032611419586
       vertices: []
       indices: 
       edges: []
