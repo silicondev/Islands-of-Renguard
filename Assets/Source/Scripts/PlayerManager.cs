@@ -12,20 +12,21 @@ namespace dEvine_and_conquer.Scripts
         private float _defaultMoveSpeed = 0.2F;
         private int _viewDisModX = 18;
         private int _viewDisModY = 18;
+        private int _viewBuffer = 5;
 
         public bool CanMove { get; set; } = true;
         public Point ViewDis { 
             get 
             {
                 var zoomMod = (CurrentZoom / _defaultZoom);
-                return new Point((int)(_viewDisModX * zoomMod), (int)(_viewDisModY * zoomMod));
-            }        
+                return new Point((int)(_viewDisModX * zoomMod) + _viewBuffer, (int)(_viewDisModY * zoomMod) + _viewBuffer);
+            }
         }
         public float MoveSpeed => (_defaultMoveSpeed / _defaultZoom) * CurrentZoom;
         public float ZoomSpeed { get; private set; } = 0.7F;
         public float SmoothSpeed { get; private set; } = 10.0F;
         public float MinZoom { get; private set; } = 1.0F;
-        public float MaxZoom { get; private set; } = 15.0F;
+        public float MaxZoom { get; private set; } = 10.0F;
         public float TargetZoom { get; private set; }
         public float CurrentZoom => Camera.main.orthographicSize;
         public Point Location => new Point((int)Math.Floor(transform.position.x), (int)Math.Floor(transform.position.y));

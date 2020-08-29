@@ -1,5 +1,5 @@
-﻿using Assets.Source.Universal;
-using dEvine_and_conquer.Base;
+﻿using dEvine_and_conquer.Base;
+using dEvine_and_conquer.Universal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,6 +19,7 @@ namespace dEvine_and_conquer.World
         public int ChunkSize { get; }
         public WorldMapper Mapper { get; private set; }
         private System.Random _rand;
+        private bool _genTree = true;
 
         public Generator(float scale, float seed, int chunkSize, WorldMapper mapper)
         {
@@ -63,44 +64,35 @@ namespace dEvine_and_conquer.World
 
         private bool TreeGen(Point loc, float height)
         {
-            int px = (int)Math.Floor(loc.X * 100);
-            int py = (int)Math.Floor(loc.Y * 100);
+            // Generates a seemingly random number from the RNG using the world seed, the tile's height and the location of the pixel in the perlin image.
+            int rx = _rand.Next(100) + (int)height + (int)(loc.X * 100);
+            int ry = _rand.Next(100) + (int)height + (int)(loc.Y * 100);
 
-            int hx = new System.Random(px).Next(100) + (int)height + (int)Seed;
-            int hy = new System.Random(py).Next(100) + (int)height + (int)Seed;
+            string rxstr = rx.ToString();
+            string rystr = ry.ToString();
 
-            string hxstr = hx.ToString();
-            string hystr = hy.ToString();
+            // Agregates the strings together to lengthen them out, converts it into a list of digits then adds all those digits together.
+            var xNum = (rxstr + rystr + rxstr).Select(x => int.Parse(x.ToString())).Sum();
+            var yNum = (rystr + rxstr + rystr).Select(x => int.Parse(x.ToString())).Sum();
 
-            string hxstrcom = hxstr + hystr + hxstr;
-            string hystrcom = hystr + hxstr + hystr;
+            // Getting the even number bools
+            var evenX = IsEven(xNum);
+            var evenY = IsEven(yNum);
 
-            int xEven = 0;
-            int xOdd = 0;
-            int yEven = 0;
-            int yOdd = 0;
+            // Places a tree if both xNum and yNum are even
+            var placeTree = evenX && evenY;
 
-            int hxlen = hxstrcom.Length;
-            int hylen = hystrcom.Length;
-
-            int longestLength = hxlen > hylen ? hxlen : hylen;
-
-            for (int i = 0; i < longestLength; i++)
+            // Only outputs to place a tree every other time a tree should be placed to thin the trees out a bit
+            var output = _genTree && placeTree;
+            if (placeTree)
             {
-                if (i < hxlen)
-                {
-                    if (IsEven(int.Parse(hxstrcom[i].ToString()))) xEven++; else xOdd++;
-                }
-                if (i < hylen)
-                {
-                    if (IsEven(int.Parse(hystrcom[i].ToString()))) yEven++; else yOdd++;
-                }
+                if (_genTree)
+                    _genTree = false;
+                else
+                    _genTree = true;
             }
 
-            var evenX = xEven >= xOdd;
-            var evenY = yEven <= yOdd;
-
-            return evenX && evenY;
+            return output;
         }
 
         private bool IsEven(int val) => (val % 2) == 0;

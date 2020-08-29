@@ -1,5 +1,5 @@
-﻿using Assets.Source.Universal;
-using dEvine_and_conquer.Base;
+﻿using dEvine_and_conquer.Base;
+using dEvine_and_conquer.Universal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,6 +35,7 @@ namespace dEvine_and_conquer.World
         public XYContainer<Tile> Tiles { get; private set; } = new List<List<Tile>>();
         public XYContainer<Overlay> Overlays { get; private set; } = new List<List<Overlay>>();
         public List<GameObject> Objects { get; set; } = new List<GameObject>();
+        public GameObject Object { get; set; }
 
         public Chunk(int x, int y, Generator gen)
         {

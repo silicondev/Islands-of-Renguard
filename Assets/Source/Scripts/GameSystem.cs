@@ -175,6 +175,10 @@ namespace dEvine_and_conquer.Scripts
 
             GameObject treeRef = (GameObject)Instantiate(Resources.Load("Overlay_Env_Tree"));
 
+            var chunkObj = new GameObject("Chunk:" + chunk.IDStr);
+            chunk.Object = Instantiate(chunkObj, transform);
+            chunk.Object.name = chunk.Object.name.Substring(0, chunk.Object.name.Length - 7);
+
             for (int y = 0; y < chunk.Tiles.Value.Count; y++)
             {
                 //foreach (var tile in tileList)
@@ -188,18 +192,18 @@ namespace dEvine_and_conquer.Scripts
                     var loadOverlay = false;
 
                     if (tile.Type == TileID.ENV.STONE)
-                        obj = Instantiate(stoneRef, transform);
+                        obj = Instantiate(stoneRef, chunk.Object.transform);
                     else if (tile.Type == TileID.ENV.WATER)
-                        obj = Instantiate(waterRef, transform);
+                        obj = Instantiate(waterRef, chunk.Object.transform);
                     else if (tile.Type == TileID.ENV.SAND)
-                        obj = Instantiate(sandRef, transform);
+                        obj = Instantiate(sandRef, chunk.Object.transform);
                     else
-                        obj = Instantiate(grassRef, transform);
+                        obj = Instantiate(grassRef, chunk.Object.transform);
 
                     if (overlay.Type == TileID.ENV_OVERLAY.TREE)
                     {
                         loadOverlay = true;
-                        overlayObj = Instantiate(treeRef, transform);
+                        overlayObj = Instantiate(treeRef, chunk.Object.transform);
                     }
 
                     obj.name = obj.name.Substring(0, obj.name.Length - 14);
@@ -223,6 +227,8 @@ namespace dEvine_and_conquer.Scripts
             Destroy(sandRef);
 
             Destroy(treeRef);
+
+            Destroy(chunkObj);
         }
 
         /// <summary>
@@ -236,6 +242,8 @@ namespace dEvine_and_conquer.Scripts
                 Destroy(obj);
             }
             chunk.Objects.Clear();
+            Destroy(chunk.Object);
+            chunk.Object = null;
         }
     }
 }

@@ -1,6 +1,6 @@
-﻿using Assets.Source.Universal;
-using dEvine_and_conquer.AI.Pathfinding.Interfaces;
+﻿using dEvine_and_conquer.AI.Pathfinding.Interfaces;
 using dEvine_and_conquer.Base;
+using dEvine_and_conquer.Universal;
 using dEvine_and_conquer.World;
 using System;
 using System.Collections.Generic;
