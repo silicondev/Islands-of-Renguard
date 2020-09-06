@@ -1,5 +1,5 @@
 ﻿using dEvine_and_conquer.Base;
-using dEvine_and_conquer.Universal;
+using dEvine_and_conquer.Entity;
 using dEvine_and_conquer.World;
 using System;
 using System.Collections;
@@ -20,6 +20,8 @@ namespace dEvine_and_conquer.Scripts
         private List<Chunk> _generatedChunks = new List<Chunk>();
         private List<Chunk> _loadedChunks = new List<Chunk>();
         private Chunk _current;
+
+        private List<GenericEntity> _entities = new List<GenericEntity>();
 
         public Tile CurrentTile => _loadedChunks.GetTileFromID(new Point((int)Math.Floor(_player.Location.X), (int)Math.Floor(_player.Location.Y)));
         public Tile StartTile = null;
@@ -52,6 +54,7 @@ namespace dEvine_and_conquer.Scripts
             InputEvents input = GetComponent<InputEvents>();
             input.OnMovementKeyPressed += OnMovement;
             input.OnScroll += OnScroll;
+            input.OnKeyPressed += OnKeyPress;
         }
 
         // Update is called once per frame
@@ -75,6 +78,22 @@ namespace dEvine_and_conquer.Scripts
         {
             _player.OnScroll(sender, e);
             RegenChunks();
+        }
+
+        private void OnKeyPress(object sender, EventArgs e)
+        {
+            KeyEventArgs args = (KeyEventArgs)e;
+            if (args.KeyPressed == KeyCode.G)
+            {
+                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+                if (Physics.Raycast(ray, out RaycastHit hit, 100))
+                {
+                    GameObject obj = hit.transform.gameObject;
+                    Debug.Log(obj.name);
+                }
+                else Debug.Log("ERROR: Could not find object.");
+            }
         }
 
         private void StartupGenerate()
@@ -168,12 +187,12 @@ namespace dEvine_and_conquer.Scripts
         /// <param name="chunk">The chunk to load.</param>
         private void LoadChunk(Chunk chunk)
         {
-            GameObject grassRef = (GameObject)Instantiate(Resources.Load("Tile_Env_Grass"));
-            GameObject stoneRef = (GameObject)Instantiate(Resources.Load("Tile_Env_Stone"));
-            GameObject waterRef = (GameObject)Instantiate(Resources.Load("Tile_Env_Water"));
-            GameObject sandRef = (GameObject)Instantiate(Resources.Load("Tile_Env_Sand"));
+            GameObject grassRef = (GameObject)Instantiate(Resources.Load("Prefabs/Tile/Tile_Env_Grass"));
+            GameObject stoneRef = (GameObject)Instantiate(Resources.Load("Prefabs/Tile/Tile_Env_Stone"));
+            GameObject waterRef = (GameObject)Instantiate(Resources.Load("Prefabs/Tile/Tile_Env_Water"));
+            GameObject sandRef = (GameObject)Instantiate(Resources.Load("Prefabs/Tile/Tile_Env_Sand"));
 
-            GameObject treeRef = (GameObject)Instantiate(Resources.Load("Overlay_Env_Tree"));
+            GameObject treeRef = (GameObject)Instantiate(Resources.Load("Prefabs/Overlay/Overlay_Env_Tree"));
 
             var chunkObj = new GameObject("Chunk:" + chunk.IDStr);
             chunk.Object = Instantiate(chunkObj, transform);
@@ -181,7 +200,6 @@ namespace dEvine_and_conquer.Scripts
 
             for (int y = 0; y < chunk.Tiles.Value.Count; y++)
             {
-                //foreach (var tile in tileList)
                 for (int x = 0; x < chunk.Tiles.Value[y].Count; x++)
                 {
                     var tile = chunk.Tiles.Value[x][y];
@@ -206,8 +224,9 @@ namespace dEvine_and_conquer.Scripts
                         overlayObj = Instantiate(treeRef, chunk.Object.transform);
                     }
 
-                    obj.name = obj.name.Substring(0, obj.name.Length - 14);
-                    if (loadOverlay) overlayObj.name = overlayObj.name.Substring(0, overlayObj.name.Length - 14);
+                    obj.name = string.Format("{0}-{1},{2}", tile.Type.Name, x.ToString(), y.ToString());
+                    //obj.name = obj.name.Substring(0, obj.name.Length - 14);
+                    if (loadOverlay) overlayObj.name = string.Format("{0}-{1},{2}", overlay.Type.Name, x.ToString(), y.ToString()); //overlayObj.name = overlayObj.name.Substring(0, overlayObj.name.Length - 14);
 
                     obj.transform.position = new Vector3(tile.Location.X + 0.5F, tile.Location.Y + 0.5F, 0);
 

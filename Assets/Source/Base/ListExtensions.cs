@@ -7,7 +7,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace dEvine_and_conquer.Universal
+namespace dEvine_and_conquer.Base
 {
     public static class ListExtensions
     {
