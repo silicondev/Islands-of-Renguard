@@ -1,4 +1,5 @@
-﻿using System;
+﻿using dEvine_and_conquer.Base;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,7 +13,7 @@ namespace dEvine_and_conquer.Entity
         public int Gender { get; set; }
         
 
-        public HumanEntity(int gender) : base(20, new List<Texture>()
+        public HumanEntity(Point location, int gender) : base(location, 20, new List<Texture>()
         {
             Resources.Load<Texture>("Textures/Entity/Human/human_male_idle_1"),
             Resources.Load<Texture>("Textures/Entity/Human/human_make_idle_2")

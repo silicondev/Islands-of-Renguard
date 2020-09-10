@@ -1,4 +1,5 @@
 ﻿using dEvine_and_conquer.Base;
+using dEvine_and_conquer.Entity;
 using dEvine_and_conquer.World;
 using System;
 using System.Collections.Generic;
@@ -94,6 +95,19 @@ namespace dEvine_and_conquer.Base
         public static Tile GetTileFromID(this List<Chunk> chunks, int x, int y)
         {
             return chunks.GetTileFromID(new Point(x, y));
+        }
+
+        public static bool AddEntityToWorld(this List<Chunk> chunks, GenericEntity entity)
+        {
+            foreach (var chunk in chunks)
+            {
+                if (chunk.Contains(entity.Location))
+                {
+                    chunk.Entities.Add(entity);
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }
