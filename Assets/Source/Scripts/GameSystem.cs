@@ -1,5 +1,5 @@
 ﻿using dEvine_and_conquer.Base;
-using dEvine_and_conquer.Universal;
+using dEvine_and_conquer.Entity;
 using dEvine_and_conquer.World;
 using System;
 using System.Collections;
@@ -13,15 +13,18 @@ namespace dEvine_and_conquer.Scripts
     {
         public GameSystem Instance { get; private set; }
 
+        private Dictionary<string, GameObject> _prefabs;
+        private GameObject _prefabObj;
+
         private PlayerManager _player;
         private Generator _generator;
         private WorldMapperSettings _mapper;
 
-        private List<Chunk> _generatedChunks = new List<Chunk>();
-        private List<Chunk> _loadedChunks = new List<Chunk>();
+        public List<Chunk> GeneratedChunks = new List<Chunk>();
+        public List<Chunk> LoadedChunks = new List<Chunk>();
         private Chunk _current;
 
-        public Tile CurrentTile => _loadedChunks.GetTileFromID(new Point((int)Math.Floor(_player.Location.X), (int)Math.Floor(_player.Location.Y)));
+        public Tile CurrentTile => LoadedChunks.GetTileFromID(new Point((int)Math.Floor(_player.Location.X), (int)Math.Floor(_player.Location.Y)));
         public Tile StartTile = null;
         void Awake()
         {
@@ -36,6 +39,29 @@ namespace dEvine_and_conquer.Scripts
         // Start is called before the first frame update
         void Start()
         {
+            _prefabObj = Instantiate(new GameObject(), transform);
+            _prefabObj.name = "Prefabs";
+            _prefabObj.SetActive(false);
+            _prefabObj.transform.position = new Vector3(0, 0, 10);
+
+            _prefabs = new Dictionary<string, GameObject>() {
+                { "tile:grass", (GameObject)Instantiate(Resources.Load("Prefabs/Tile/Tile_Env_Grass"), _prefabObj.transform) },
+                { "tile:stone", (GameObject)Instantiate(Resources.Load("Prefabs/Tile/Tile_Env_Stone"), _prefabObj.transform) },
+                { "tile:water", (GameObject)Instantiate(Resources.Load("Prefabs/Tile/Tile_Env_Water"), _prefabObj.transform) },
+                { "tile:sand", (GameObject)Instantiate(Resources.Load("Prefabs/Tile/Tile_Env_Sand"), _prefabObj.transform) },
+
+                { "overlay:tree", (GameObject)Instantiate(Resources.Load("Prefabs/Overlay/Overlay_Env_Tree"), _prefabObj.transform) },
+
+                { "entity:human", (GameObject)Instantiate(Resources.Load("Prefabs/Entity/Human/Entity_Human_Male"), _prefabObj.transform) },
+            };
+
+            foreach (var obj in _prefabs)
+            {
+                obj.Value.transform.position = new Vector3(0, 0, 10);
+                obj.Value.SetActive(false);
+                obj.Value.name = obj.Key + ";PREFAB";
+            }
+
             var seed = Random.Range(0.0F, 10000000.0F);
             _mapper = new WorldMapperSettings(80, 100, 105, 200);
             _generator = new Generator(0.01F, seed, 16, new WorldMapper(_mapper));
@@ -52,6 +78,7 @@ namespace dEvine_and_conquer.Scripts
             InputEvents input = GetComponent<InputEvents>();
             input.OnMovementKeyPressed += OnMovement;
             input.OnScroll += OnScroll;
+            input.OnKeyPressed += OnKeyPress;
         }
 
         // Update is called once per frame
@@ -77,6 +104,22 @@ namespace dEvine_and_conquer.Scripts
             RegenChunks();
         }
 
+        private void OnKeyPress(object sender, EventArgs e)
+        {
+            KeyEventArgs args = (KeyEventArgs)e;
+            if (args.KeyPressed == KeyCode.G)
+            {
+                if (!LoadedChunks.AddEntityToWorld(new HumanEntity(_player.Location, 1)))
+                {
+                    Debug.Log("ERROR: Could not add entity to world.");
+                } else
+                {
+                    Debug.Log("Entity Human Added!");
+                    ForceRegen();
+                }
+            }
+        }
+
         private void StartupGenerate()
         {
             RegenChunks();
@@ -88,6 +131,18 @@ namespace dEvine_and_conquer.Scripts
 
         }
 
+        public void CreateEntity(GenericEntity entity)
+        {
+            LoadedChunks.GetChunkWithTile(entity.Location)?.Entities.Add(entity);
+        }
+
+        private void ForceRegen()
+        {
+            List<Chunk> remove = new List<Chunk>(LoadedChunks);
+            RemoveChunks(remove);
+            RegenChunks();
+        }
+
         /// <summary>
         /// Either generates or reloads chunks coming into view and unloads chunks going out of view.
         /// </summary>
@@ -96,7 +151,7 @@ namespace dEvine_and_conquer.Scripts
             int posX = (int)_player.Location.X;
             int posY = (int)_player.Location.Y;
 
-            foreach (var chunk in _loadedChunks)
+            foreach (var chunk in LoadedChunks)
             {
                 if (chunk.Contains(posX, posY))
                 {
@@ -116,49 +171,53 @@ namespace dEvine_and_conquer.Scripts
                 for (int x = (int)topLeftDraw.X; x < (int)bottomRightDraw.X; x++)
                 {
                     // If chunk is already loaded, then skip this loop
-                    if (_loadedChunks.GetChunkWithTile(x, y) != null)
+                    if (LoadedChunks.GetChunkWithTile(x, y) != null)
                     {
-                        foundChunks.Add(_loadedChunks.GetChunkWithTile(x, y));
+                        foundChunks.Add(LoadedChunks.GetChunkWithTile(x, y));
                         continue;
                     }
 
                     // Find chunk if exists
                     var id = new Point((int)Math.Floor(x / 16d), (int)Math.Floor(y / 16d));
-                    var exists = _generatedChunks.GetChunk(id) != null;
-                    var newChunk = exists ? _generatedChunks.GetChunk(id) : new Chunk(id, _generator);
+                    var exists = GeneratedChunks.GetChunk(id) != null;
+                    var newChunk = exists ? GeneratedChunks.GetChunk(id) : new Chunk(id, _generator, this);
 
                     // Chunk does not already exist, generate a new one.
                     if (!exists)
                     {
                         hasNewChunks = true;
                         newChunk.Generate();
-                        _generatedChunks.Add(newChunk);
+                        GeneratedChunks.Add(newChunk);
                     }
 
                     // Load chunk
-                    _loadedChunks.Add(newChunk);
+                    LoadedChunks.Add(newChunk);
                     LoadChunk(newChunk);
                     if (newChunk.Contains(posX, posY)) _current = newChunk;
                 }
             }
-            if (hasNewChunks) Debug.Log("Current Generated Chunks: " + _generatedChunks.Count);
+            if (hasNewChunks) Debug.Log("Current Generated Chunks: " + GeneratedChunks.Count);
 
             // Unload unneeded chunks
             List<Chunk> removeChunks = new List<Chunk>();
-            foreach (var chunk in _loadedChunks)
+            foreach (var chunk in LoadedChunks)
             {
                 if (foundChunks.GetChunk(chunk.ID) == null)
                 {
-                    UnloadChunk(chunk);
                     removeChunks.Add(chunk);
                 }
             }
-            foreach (var chunk in removeChunks)
+            RemoveChunks(removeChunks);
+
+            foreach (var chunk in LoadedChunks) chunk.Refresh();
+        }
+
+        private void RemoveChunks(List<Chunk> chunks)
+        {
+            foreach (var chunk in chunks)
             {
-                if (_loadedChunks.GetChunk(chunk.ID) != null)
-                {
-                    _loadedChunks.Remove(chunk);
-                }
+                LoadedChunks.Remove(chunk);
+                UnloadChunk(chunk);
             }
         }
 
@@ -168,20 +227,12 @@ namespace dEvine_and_conquer.Scripts
         /// <param name="chunk">The chunk to load.</param>
         private void LoadChunk(Chunk chunk)
         {
-            GameObject grassRef = (GameObject)Instantiate(Resources.Load("Tile_Env_Grass"));
-            GameObject stoneRef = (GameObject)Instantiate(Resources.Load("Tile_Env_Stone"));
-            GameObject waterRef = (GameObject)Instantiate(Resources.Load("Tile_Env_Water"));
-            GameObject sandRef = (GameObject)Instantiate(Resources.Load("Tile_Env_Sand"));
-
-            GameObject treeRef = (GameObject)Instantiate(Resources.Load("Overlay_Env_Tree"));
-
             var chunkObj = new GameObject("Chunk:" + chunk.IDStr);
             chunk.Object = Instantiate(chunkObj, transform);
             chunk.Object.name = chunk.Object.name.Substring(0, chunk.Object.name.Length - 7);
 
             for (int y = 0; y < chunk.Tiles.Value.Count; y++)
             {
-                //foreach (var tile in tileList)
                 for (int x = 0; x < chunk.Tiles.Value[y].Count; x++)
                 {
                     var tile = chunk.Tiles.Value[x][y];
@@ -191,23 +242,19 @@ namespace dEvine_and_conquer.Scripts
                     GameObject overlayObj = null;
                     var loadOverlay = false;
 
-                    if (tile.Type == TileID.ENV.STONE)
-                        obj = Instantiate(stoneRef, chunk.Object.transform);
-                    else if (tile.Type == TileID.ENV.WATER)
-                        obj = Instantiate(waterRef, chunk.Object.transform);
-                    else if (tile.Type == TileID.ENV.SAND)
-                        obj = Instantiate(sandRef, chunk.Object.transform);
-                    else
-                        obj = Instantiate(grassRef, chunk.Object.transform);
+                    obj = Instantiate(_prefabs[tile.Type.Name], chunk.Object.transform);
+                    obj.SetActive(true);
 
-                    if (overlay.Type == TileID.ENV_OVERLAY.TREE)
+                    if (overlay.Type != TileID.ENV_OVERLAY.VOID)
                     {
                         loadOverlay = true;
-                        overlayObj = Instantiate(treeRef, chunk.Object.transform);
+                        overlayObj = Instantiate(_prefabs[overlay.Type.Name], chunk.Object.transform);
+                        overlayObj.SetActive(true);
                     }
 
-                    obj.name = obj.name.Substring(0, obj.name.Length - 14);
-                    if (loadOverlay) overlayObj.name = overlayObj.name.Substring(0, overlayObj.name.Length - 14);
+                    obj.name = string.Format("{0};{1},{2}", tile.Type.Name, x.ToString(), y.ToString());
+                    //obj.name = obj.name.Substring(0, obj.name.Length - 14);
+                    if (loadOverlay) overlayObj.name = string.Format("{0};{1},{2}", overlay.Type.Name, x.ToString(), y.ToString()); //overlayObj.name = overlayObj.name.Substring(0, overlayObj.name.Length - 14);
 
                     obj.transform.position = new Vector3(tile.Location.X + 0.5F, tile.Location.Y + 0.5F, 0);
 
@@ -217,17 +264,19 @@ namespace dEvine_and_conquer.Scripts
                         Destroy(overlayObj);
 
                     chunk.Objects.Add(obj);
-                    chunk.Objects.Add(overlayObj);
+                    if (loadOverlay) chunk.Objects.Add(overlayObj);
                 }
             }
 
-            Destroy(grassRef);
-            Destroy(stoneRef);
-            Destroy(waterRef);
-            Destroy(sandRef);
-
-            Destroy(treeRef);
-
+            foreach (var entity in chunk.Entities)
+            {
+                Debug.Log(string.Format("Entity Generated at {0},{1}", entity.Location.X.ToString(), entity.Location.Y.ToString()));
+                GameObject entityObj = Instantiate(_prefabs[entity.Type.Name], chunk.Object.transform);
+                entityObj.SetActive(true);
+                entityObj.name = string.Format("{0};{1},{2}", "entity:human", entity.Location.X.ToString(), entity.Location.Y.ToString());
+                entityObj.transform.position = new Vector3(entity.Location.X + 0.5F, entity.Location.Y + 0.5F, -0.2F);
+                chunk.Objects.Add(entityObj);
+            }
             Destroy(chunkObj);
         }
 

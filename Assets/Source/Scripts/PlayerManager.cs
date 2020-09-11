@@ -37,13 +37,13 @@ namespace dEvine_and_conquer.Scripts
         private void MoveDown() => Move(MoveSpeed / -1, MoveSpeed / -1);
 
         // Start is called before the first frame update
-        void Start()
+        private void Start()
         {
             TargetZoom = _defaultZoom;
         }
 
         // Update is called once per frame
-        void Update()
+        private void Update()
         {
             Camera.main.orthographicSize = Mathf.MoveTowards(Camera.main.orthographicSize, TargetZoom, SmoothSpeed * Time.deltaTime);
         }

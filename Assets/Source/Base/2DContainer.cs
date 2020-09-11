@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace dEvine_and_conquer.Universal
+namespace dEvine_and_conquer.Base
 {
     public struct XYContainer<T> : ICollection<ICollection<T>>
     {
