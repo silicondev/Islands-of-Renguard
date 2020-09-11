@@ -36,20 +36,6 @@ namespace dEvine_and_conquer.World
         }
     }
 
-    public class Prefab
-    {
-        public readonly ID ID;
-        public readonly bool IsCollidable = false;
-        public string Name;
-
-        public Prefab(ID id, string name, bool isCollide)
-        {
-            ID = id;
-            IsCollidable = isCollide;
-            Name = name;
-        }
-    }
-
     public class Tile : VisualObject
     {
         public Prefab Type { get; set; }
