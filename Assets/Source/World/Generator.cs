@@ -32,10 +32,10 @@ namespace dEvine_and_conquer.World
 
         public ChunkData GenerateChunk(Point id)
         {
-            int xPos = (int)id.X * ChunkSize;
-            int yPos = (int)id.Y * ChunkSize;
-            float xStart = Seed + xPos;
-            float yStart = Seed + yPos;
+            int xChunkPos = (int)id.X * ChunkSize;
+            int yChunkPos = (int)id.Y * ChunkSize;
+            float xStart = Seed + xChunkPos;
+            float yStart = Seed + yChunkPos;
             var tiles = new List<List<Tile>>();
             var overlays = new List<List<Overlay>>();
             for (int y = 0; y < ChunkSize; y++)
@@ -44,12 +44,13 @@ namespace dEvine_and_conquer.World
                 overlays.Add(new List<Overlay>());
                 for (int x = 0; x < ChunkSize; x++)
                 {
+                    int xPos = x + xChunkPos;
+                    int yPos = y + yChunkPos;
                     float perlinX = (x + xStart) * Scale;
                     float perlinY = (y + yStart) * Scale;
                     float height = Mathf.PerlinNoise(perlinX, perlinY) * 255;
-                    Tile tile = new Tile(Mapper.ParseHeight(height), height, xPos + x, yPos + y);
-                    Overlay overlay = new Overlay(TileID.ENV_OVERLAY.VOID, xPos + x, yPos + y);
-
+                    Tile tile = new Tile(Mapper.ParseHeight(height), height, xPos, yPos);
+                    Overlay overlay = new Overlay(TileID.ENV_OVERLAY.VOID, xPos, yPos);
                     
                     if (tile.Type == TileID.ENV.GRASS && TreeGen(new Point(perlinX, perlinY), height)) overlay.Type = TileID.ENV_OVERLAY.TREE;
 

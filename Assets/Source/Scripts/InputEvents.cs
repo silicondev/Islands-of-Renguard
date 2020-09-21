@@ -51,6 +51,11 @@ namespace dEvine_and_conquer.Scripts
                 KeyEventArgs args = new KeyEventArgs(KeyCode.G);
                 OnKeyPressed?.Invoke(this, args);
             }
+            if (CheckKeySingle(KeyCode.H))
+            {
+                KeyEventArgs args = new KeyEventArgs(KeyCode.H);
+                OnKeyPressed?.Invoke(this, args);
+            }
 
             var scrollDelta = Input.GetAxis("Mouse ScrollWheel");
             if (scrollDelta != 0.0F)

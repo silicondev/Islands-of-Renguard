@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace dEvine_and_conquer.Base
 {
-    public struct XYContainer<T> : ICollection<ICollection<T>>
+    public struct XYContainer<T>// : ICollection<ICollection<T>>
     {
-        private readonly List<List<T>> _data;
+        private List<List<T>> _data;
         public static implicit operator XYContainer<T>(List<List<T>> data)
         {
             return new XYContainer<T>(data);
@@ -20,12 +20,26 @@ namespace dEvine_and_conquer.Base
             _data = data;
         }
 
+        public XYContainer(XYContainer<T> data)
+        {
+            if (data._data == null)
+                _data = new List<List<T>>();
+            else
+                _data = data._data;
+        }
+
+        private void CheckData() 
+        {
+            if (_data == null) _data = new List<List<T>>();
+        }
+
         public bool IsReadOnly => false;
 
-        public int Count => CountMethod();
+        public int Count() => CountAll();
 
-        public int CountMethod()
+        public int CountAll()
         {
+            CheckData();
             int val = 0;
             foreach (var list in _data)
             {
@@ -36,6 +50,7 @@ namespace dEvine_and_conquer.Base
 
         public void Clear()
         {
+            CheckData();
             foreach (var val in _data)
             {
                 val.Clear();
@@ -45,6 +60,7 @@ namespace dEvine_and_conquer.Base
 
         public bool Contains(T item)
         {
+            CheckData();
             foreach (var list in _data)
             {
                 foreach (var ob in list)
@@ -57,6 +73,7 @@ namespace dEvine_and_conquer.Base
 
         public bool Remove(T item)
         {
+            CheckData();
             foreach (var list in _data)
             {
                 foreach (var ob in list)
@@ -71,15 +88,9 @@ namespace dEvine_and_conquer.Base
             return false;
         }
 
-        public static bool operator ==(XYContainer<T> a, XYContainer<T> b)
-        {
-            return a._data == b._data;
-        }
+        public static bool operator ==(XYContainer<T> a, XYContainer<T> b) => a._data == b._data;
 
-        public static bool operator !=(XYContainer<T> a, XYContainer<T> b)
-        {
-            return a._data != b._data;
-        }
+        public static bool operator !=(XYContainer<T> a, XYContainer<T> b) => a._data != b._data;
 
         public override bool Equals(object obj)
         {
@@ -92,35 +103,32 @@ namespace dEvine_and_conquer.Base
 
         public override int GetHashCode()
         {
+            CheckData();
             return _data.GetHashCode();
         }
 
-        public bool Equals(XYContainer<T> other)
+        public bool Equals(XYContainer<T> other) => _data == other._data;
+
+        public bool Equals(List<List<T>> data) => _data == data;
+
+        public T Get(int x, int y) => _data[y][x];
+
+        public void Add(int y, T item) => _data.ElementAt(y).Add(item);
+
+        public void Add(T item)
         {
-            return Value == other._data;
+            CheckData();
+            int yCount = Count(false);
+            if (yCount == 0) AddLine();
+            _data.ElementAt(yCount - 1).Add(item);
         }
 
-        public List<List<T>> Value => _data;
+        public int Count(bool isX) => isX ? _data[0].Count() : _data.Count();
 
-        public IEnumerator<ICollection<T>> GetEnumerator() => _data.GetEnumerator();
-
-        IEnumerator IEnumerable.GetEnumerator() =>_data.GetEnumerator();
-
-        public bool Remove(ICollection<T> item)
+        public void AddLine()
         {
-            throw new NotImplementedException();
-        }
-        public void CopyTo(ICollection<T>[] array, int arrayIndex)
-        {
-            throw new NotImplementedException();
-        }
-        public bool Contains(ICollection<T> item)
-        {
-            throw new NotImplementedException();
-        }
-        public void Add(ICollection<T> item)
-        {
-            throw new NotImplementedException();
+            CheckData();
+            _data.Add(new List<T>());
         }
     }
 }

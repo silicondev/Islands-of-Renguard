@@ -33,27 +33,27 @@ namespace dEvine_and_conquer.AI.Pathfinding.AStar
             int x = (int)Tile.Location.X;
             int y = (int)Tile.Location.Y;
 
-            if (grid == null || grid.Value[0] == null || grid.Value[0][0] == null)
+            if (grid == null || grid.Get(0, 0) == null)
                 return;
 
             Local.Clear();
 
-            int rows = grid.Value[0].Count();
-            int cols = grid.Value.Count();
+            int rows = grid.Count(true);
+            int cols = grid.Count(false);
 
             bool xa = x < cols - 1;
             bool xb = x > 0;
             bool ya = y < rows - 1;
             bool yb = y > 0;
 
-            AStarTile gxa = xa ? grid.Value[x + 1][y] : null;
-            AStarTile gxb = xb ? grid.Value[x - 1][y] : null;
-            AStarTile gya = ya ? grid.Value[x][y + 1] : null;
-            AStarTile gyb = yb ? grid.Value[x][y - 1] : null;
-            AStarTile gxyaa = (xa && ya) ? grid.Value[x + 1][y + 1] : null;
-            AStarTile gxyba = (xb && ya) ? grid.Value[x - 1][y + 1] : null;
-            AStarTile gxyab = (xa && yb) ? grid.Value[x + 1][y - 1] : null;
-            AStarTile gxybb = (xb && yb) ? grid.Value[x - 1][y - 1] : null;
+            AStarTile gxa = xa ? grid.Get(x + 1, y) : null;
+            AStarTile gxb = xb ? grid.Get(x - 1, y) : null;
+            AStarTile gya = ya ? grid.Get(x, y + 1) : null;
+            AStarTile gyb = yb ? grid.Get(x, y - 1) : null;
+            AStarTile gxyaa = (xa && ya) ? grid.Get(x + 1, y + 1) : null;
+            AStarTile gxyba = (xb && ya) ? grid.Get(x - 1, y + 1) : null;
+            AStarTile gxyab = (xa && yb) ? grid.Get(x + 1, y - 1) : null;
+            AStarTile gxybb = (xb && yb) ? grid.Get(x - 1, y - 1) : null;
 
             if (xa && !gxa.IsWall) Local.Add(gxa);
             if (xb && !gxb.IsWall) Local.Add(gxb);

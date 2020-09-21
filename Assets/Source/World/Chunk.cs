@@ -1,4 +1,5 @@
 ﻿using dEvine_and_conquer.Base;
+using dEvine_and_conquer.Base.Interfaces;
 using dEvine_and_conquer.Entity;
 using dEvine_and_conquer.Scripts;
 using System;
@@ -11,7 +12,7 @@ using UnityEngine;
 
 namespace dEvine_and_conquer.World
 {
-    public class Chunk
+    public class Chunk : IUpdateable
     {
         private GameSystem _system;
         public int xPos { get; private set; }
@@ -69,28 +70,21 @@ namespace dEvine_and_conquer.World
         {
             return Contains((int)loc.X, (int)loc.Y);
         }
-        
-        public bool Contains(int x, int y) => 
-            x >= xPos &&
-            x < xPos + _generator.ChunkSize &&
-            y >= yPos &&
-            y < yPos + _generator.ChunkSize;
 
-        public void Refresh()
+        public bool Contains(int x, int y) =>
+            x >= xPos && x < xPos + _generator.ChunkSize &&
+            y >= yPos && y < yPos + _generator.ChunkSize;
+
+        public void Update(GameSystem system)
         {
             foreach (var entity in Entities)
             {
+                entity.Update(system);
                 if (!Contains(entity.Location))
                 {
-                    foreach (var chunk in _system.GeneratedChunks)
-                    {
-                        if (chunk.ID != ID && chunk.Contains(entity.Location))
-                        {
-                            chunk.Entities.Add(entity);
-                            continue;
-                        }
-                    }
+                    GameObject.Destroy(entity.Instance.gameObject);
                     Entities.Remove(entity); //This just despawns the entity if they leave the generated area. This may need fixing.
+                    _system.GeneratedChunks.AddEntityToWorld(entity);
                 }
             }
         }

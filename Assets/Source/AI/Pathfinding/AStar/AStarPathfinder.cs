@@ -17,42 +17,57 @@ namespace dEvine_and_conquer.AI.Pathfinding.AStar
         private List<AStarTile> _path = new List<AStarTile>();
         private AStarTile _start;
         private AStarTile _end;
-        private int _cols => _tiles.Value.Count();
-        private int _rows => _tiles.Value[0].Count();
+        private int _cols => _tiles.Count(true);
+        private int _rows => _tiles.Count(false);
         private XYContainer<Tile> _tiles;
         private XYContainer<AStarTile> _gridHold;
         private XYContainer<AStarTile> _grid
         {
             get
             {
-                if (_gridHold == null)
-                {
-                    List<List<AStarTile>> tmp = new List<List<AStarTile>>();
-
-                    for (int y = 0; y < _rows; y++)
-                    {
-                        tmp.Add(new List<AStarTile>());
-                        for (int x = 0; x < _cols; x++)
-                        {
-                            var tile = new AStarTile(_tiles.Value[x][y]);
-                            tmp[y].Add(tile);
-                        }
-                    }
-
-                    _gridHold = tmp;
-                }
+                if (_gridHold == null) ReloadGrid();
                 return _gridHold;
             }
         }
 
-        public AStarPathfinder(List<List<Tile>> tiles)
+        public AStarPathfinder(XYContainer<Tile> tiles)
         {
             _tiles = tiles;
         }
 
+        public AStarPathfinder()
+        {
+
+        }
+
+        private void ReloadGrid()
+        {
+            XYContainer<AStarTile> tmp = new XYContainer<AStarTile>();
+
+            for (int y = 0; y < _rows; y++)
+            {
+                tmp.AddLine();
+                for (int x = 0; x < _cols; x++)
+                {
+                    var tile = new AStarTile(_tiles.Get(x, y));
+                    tmp.Add(tile);
+                }
+            }
+
+            _gridHold = tmp;
+        }
+
+        public void UpdateWorld(XYContainer<Tile> tiles)
+        {
+            _tiles = tiles;
+            _gridHold = null;
+        }
+
         public List<Tile> GetPath(Point start, Point end)
         {
-            if (_tiles == null || _tiles.Value[0] == null || _tiles.Value[0][0] == null)
+            if (_grid == null) ReloadGrid();
+
+            if (_tiles == null || _tiles.Get(0, 0) == null)
                 return null;
 
             _openSet.Clear();
@@ -62,7 +77,7 @@ namespace dEvine_and_conquer.AI.Pathfinding.AStar
             {
                 for (int x = 0; x < _cols; x++)
                 {
-                    var tile = _grid.Value[x][y];
+                    var tile = _grid.Get(x, y);
 
                     var pnt = new Point(x, y);
                     if (pnt == start)
@@ -111,7 +126,7 @@ namespace dEvine_and_conquer.AI.Pathfinding.AStar
                 {
                     for (int x = 0; x < _cols; x++)
                     {
-                        _grid.Value[x][y].RefreshLocal(_grid);
+                        _grid.Get(x, y).RefreshLocal(_grid);
                     }
                 }
 
