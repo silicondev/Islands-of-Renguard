@@ -17,13 +17,7 @@ namespace dEvine_and_conquer.World
         private GameSystem _system;
         public int xPos { get; private set; }
         public int yPos { get; private set; }
-        public string IDStr
-        {
-            get
-            {
-                return (xPos / _generator.ChunkSize).ToString() + ";" + (yPos / _generator.ChunkSize).ToString();
-            }
-        }
+        public string IDStr => ((int)ID.X).ToString() + ";" + ((int)ID.Y).ToString();
 
         public Point ID
         {
@@ -77,15 +71,22 @@ namespace dEvine_and_conquer.World
 
         public void Update(GameSystem system)
         {
+            List<GenericEntity> toRemove = new List<GenericEntity>();
             foreach (var entity in Entities)
             {
                 entity.Update(system);
                 if (!Contains(entity.Location))
                 {
-                    GameObject.Destroy(entity.Instance.gameObject);
-                    Entities.Remove(entity); //This just despawns the entity if they leave the generated area. This may need fixing.
+                    //GameObject.Destroy(entity.Instance.gameObject);
                     _system.GeneratedChunks.AddEntityToWorld(entity);
+                    //Entities.Remove(entity); //This just despawns the entity if they leave the generated area. This may need fixing.
+                    toRemove.Add(entity);
                 }
+            }
+
+            foreach (var entity in toRemove)
+            {
+                Entities.Remove(entity);
             }
         }
     }

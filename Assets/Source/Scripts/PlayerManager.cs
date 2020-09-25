@@ -18,7 +18,7 @@ namespace dEvine_and_conquer.Scripts
         public Point ViewDis { 
             get 
             {
-                var zoomMod = (CurrentZoom / _defaultZoom);
+                var zoomMod = CurrentZoom / _defaultZoom;
                 return new Point((int)(_viewDisModX * zoomMod) + _viewBuffer, (int)(_viewDisModY * zoomMod) + _viewBuffer);
             }
         }
@@ -28,13 +28,23 @@ namespace dEvine_and_conquer.Scripts
         public float MinZoom { get; private set; } = 1.0F;
         public float MaxZoom { get; private set; } = 10.0F;
         public float TargetZoom { get; private set; }
-        public float CurrentZoom => Camera.main.orthographicSize;
+        public float CurrentZoom
+        {
+            get
+            {
+                return Camera.main.orthographicSize;
+            }
+            set
+            {
+                Camera.main.orthographicSize = value;
+            }
+        }
         public Point Location => new Point((int)Math.Floor(transform.position.x), (int)Math.Floor(transform.position.y));
 
-        private void MoveUp() => Move(MoveSpeed, MoveSpeed);
-        private void MoveRight() => Move(MoveSpeed, MoveSpeed / -1);
-        private void MoveLeft() => Move(MoveSpeed / -1, MoveSpeed);
-        private void MoveDown() => Move(MoveSpeed / -1, MoveSpeed / -1);
+        private void MoveUp() => Move(0, MoveSpeed);
+        private void MoveRight() => Move(MoveSpeed, 0);
+        private void MoveLeft() => Move(MoveSpeed / -1, 0);
+        private void MoveDown() => Move(0, MoveSpeed / -1);
 
         // Start is called before the first frame update
         private void Start()
@@ -45,7 +55,7 @@ namespace dEvine_and_conquer.Scripts
         // Update is called once per frame
         private void Update()
         {
-            Camera.main.orthographicSize = Mathf.MoveTowards(Camera.main.orthographicSize, TargetZoom, SmoothSpeed * Time.deltaTime);
+            if (CurrentZoom != TargetZoom) CurrentZoom = Mathf.MoveTowards(CurrentZoom, TargetZoom, SmoothSpeed * Time.deltaTime);
         }
 
         public void OnMove(object sender, EventArgs args)

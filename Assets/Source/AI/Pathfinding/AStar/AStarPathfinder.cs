@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace dEvine_and_conquer.AI.Pathfinding.AStar
 {
@@ -17,11 +18,11 @@ namespace dEvine_and_conquer.AI.Pathfinding.AStar
         private List<AStarTile> _path = new List<AStarTile>();
         private AStarTile _start;
         private AStarTile _end;
-        private int _cols => _tiles.Count(true);
-        private int _rows => _tiles.Count(false);
-        private XYContainer<Tile> _tiles;
-        private XYContainer<AStarTile> _gridHold;
-        private XYContainer<AStarTile> _grid
+        private float _maxScopeVal = 100;
+        private int _scopeDiv = 2;
+        private List<Tile> _tiles;
+        private List<AStarTile> _gridHold;
+        private List<AStarTile> _grid
         {
             get
             {
@@ -29,8 +30,7 @@ namespace dEvine_and_conquer.AI.Pathfinding.AStar
                 return _gridHold;
             }
         }
-
-        public AStarPathfinder(XYContainer<Tile> tiles)
+        public AStarPathfinder(List<Tile> tiles)
         {
             _tiles = tiles;
         }
@@ -42,22 +42,17 @@ namespace dEvine_and_conquer.AI.Pathfinding.AStar
 
         private void ReloadGrid()
         {
-            XYContainer<AStarTile> tmp = new XYContainer<AStarTile>();
+            List<AStarTile> tmp = new List<AStarTile>();
 
-            for (int y = 0; y < _rows; y++)
+            foreach (var tile in _tiles)
             {
-                tmp.AddLine();
-                for (int x = 0; x < _cols; x++)
-                {
-                    var tile = new AStarTile(_tiles.Get(x, y));
-                    tmp.Add(tile);
-                }
+                tmp.Add(new AStarTile(tile));
             }
 
             _gridHold = tmp;
         }
 
-        public void UpdateWorld(XYContainer<Tile> tiles)
+        public void UpdateWorld(List<Tile> tiles)
         {
             _tiles = tiles;
             _gridHold = null;
@@ -67,24 +62,26 @@ namespace dEvine_and_conquer.AI.Pathfinding.AStar
         {
             if (_grid == null) ReloadGrid();
 
-            if (_tiles == null || _tiles.Get(0, 0) == null)
+            if (_tiles == null)
                 return null;
 
             _openSet.Clear();
             _closedSet.Clear();
 
-            for (int y = 0; y < _rows; y++)
-            {
-                for (int x = 0; x < _cols; x++)
-                {
-                    var tile = _grid.Get(x, y);
+            _start = _grid.Where(x => x.Location == start).First();
+            _end = _grid.Where(x => x.Location == end).First();
 
-                    var pnt = new Point(x, y);
-                    if (pnt == start)
-                        _start = tile;
-                    else if (pnt == end)
-                        _end = tile;
-                }
+            List<AStarTile> scope = new List<AStarTile>();
+
+            var seh = _heuristic(_start, _end);
+            var seScope = Mathf.Clamp(seh / _scopeDiv, 0, _maxScopeVal);
+
+            foreach (var tile in _grid)
+            {
+                var s = _heuristic(tile, _start);
+                var e = _heuristic(tile, _end);
+                var h = s + e;
+                if (h <= seh + seScope) scope.Add(tile);
             }
 
             _openSet.Add(_start);
@@ -119,15 +116,13 @@ namespace dEvine_and_conquer.AI.Pathfinding.AStar
                     {
                         output.Add(i.Tile);
                     }
+                    output.Reverse();
                     return output;
                 }
 
-                for (int y = 0; y < _rows; y++)
+                foreach (var tile in scope)
                 {
-                    for (int x = 0; x < _cols; x++)
-                    {
-                        _grid.Get(x, y).RefreshLocal(_grid);
-                    }
+                    tile.RefreshLocal(scope);
                 }
 
                 for (int i = 0; i < _closest.Local.Count(); i++)
@@ -179,14 +174,6 @@ namespace dEvine_and_conquer.AI.Pathfinding.AStar
             return (float)z;
         }
 
-        private int _difference(int a, int b)
-        {
-            if (a > b)
-                return a - b;
-            else if (b > a)
-                return b - a;
-            else
-                return 0;
-        }
+        private int _difference(int a, int b) => a > b ? a - b : b > a ? b - a : 0;
     }
 }

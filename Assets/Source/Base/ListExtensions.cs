@@ -1,4 +1,5 @@
-﻿using dEvine_and_conquer.Base;
+﻿using dEvine_and_conquer.AI.Pathfinding.AStar;
+using dEvine_and_conquer.Base;
 using dEvine_and_conquer.Base.Interfaces;
 using dEvine_and_conquer.Entity;
 using dEvine_and_conquer.Scripts;
@@ -9,6 +10,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEditor;
 
 namespace dEvine_and_conquer.Base
 {
@@ -126,5 +128,15 @@ namespace dEvine_and_conquer.Base
             chunks.ForEach(x => list.AddRange(x.Entities));
             return list;
         }
+
+        public static T Min<T>(this List<T> list, Func<T, float> prop) => list.Aggregate((i1,i2) => prop(i1) < prop(i2) ? i1 : i2);
+        public static T Max<T>(this List<T> list, Func<T, float> prop) => list.Aggregate((i1, i2) => prop(i1) > prop(i2) ? i1 : i2);
+
+        public static float MinValue<T>(this List<T> list, Func<T, float> prop) => prop(list.Aggregate((i1, i2) => prop(i1) < prop(i2) ? i1 : i2));
+        public static float MaxValue<T>(this List<T> list, Func<T, float> prop) => prop(list.Aggregate((i1, i2) => prop(i1) > prop(i2) ? i1 : i2));
+
+        public static Tile Get(this List<Tile> tiles, int x, int y) => tiles.Get(new Point(x, y));
+
+        public static Tile Get(this List<Tile> tiles, Point loc) => tiles.Where(x => (int)x.Location.X == (int)loc.X && (int)x.Location.Y == (int)loc.Y).First();
     }
 }

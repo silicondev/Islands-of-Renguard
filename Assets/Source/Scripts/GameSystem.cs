@@ -22,6 +22,37 @@ namespace dEvine_and_conquer.Scripts
 
         public List<Chunk> GeneratedChunks = new List<Chunk>();
         public List<Chunk> LoadedChunks = new List<Chunk>();
+
+        public XYContainer<Chunk> LoadedChunks2D
+        {
+            get
+            {
+                if (_loadedChunks2DHold == null)
+                {
+                    int lowestX = (int)LoadedChunks.MinValue(c => c.ID.X);
+                    int lowestY = (int)LoadedChunks.MinValue(c => c.ID.Y);
+                    int heighestX = (int)LoadedChunks.MaxValue(c => c.ID.X);
+                    int heighestY = (int)LoadedChunks.MaxValue(c => c.ID.Y);
+
+                    XYContainer<Chunk> chunks2D = new List<List<Chunk>>();
+                    for (int y = lowestY; y < heighestY; y++)
+                    {
+                        chunks2D.AddLine();
+                        for (int x = lowestX; x < heighestX; x++)
+                        {
+                            chunks2D.Add(LoadedChunks.GetChunk(x, y));
+                        }
+                    }
+
+                    _loadedChunks2DHold = chunks2D;
+                }
+
+                return _loadedChunks2DHold;
+            }
+        }
+
+        private XYContainer<Chunk> _loadedChunks2DHold = null;
+
         private Chunk _current;
 
         public Tile CurrentTile => LoadedChunks.GetTileFromID(new Point((int)Math.Floor(Player.Location.X), (int)Math.Floor(Player.Location.Y)));
@@ -72,6 +103,8 @@ namespace dEvine_and_conquer.Scripts
                 Player = playerObj.GetComponent<PlayerManager>();
             else
                 Debug.LogError("Could not find Player Object");
+
+            //var hud = playerObj.GetComponentsInChildren()
 
             StartupGenerate();
 
@@ -152,6 +185,7 @@ namespace dEvine_and_conquer.Scripts
         /// </summary>
         private void RegenChunks()
         {
+            _loadedChunks2DHold = null;
             int posX = (int)Player.Location.X;
             int posY = (int)Player.Location.Y;
 

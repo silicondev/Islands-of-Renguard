@@ -112,6 +112,7 @@ namespace dEvine_and_conquer.Base
         public bool Equals(List<List<T>> data) => _data == data;
 
         public T Get(int x, int y) => _data[y][x];
+        public T Get(Point loc) => _data[(int)loc.Y][(int)loc.X];
 
         public void Add(int y, T item) => _data.ElementAt(y).Add(item);
 
