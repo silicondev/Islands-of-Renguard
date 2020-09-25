@@ -135,8 +135,23 @@ namespace dEvine_and_conquer.Base
         public static float MinValue<T>(this List<T> list, Func<T, float> prop) => prop(list.Aggregate((i1, i2) => prop(i1) < prop(i2) ? i1 : i2));
         public static float MaxValue<T>(this List<T> list, Func<T, float> prop) => prop(list.Aggregate((i1, i2) => prop(i1) > prop(i2) ? i1 : i2));
 
-        public static Tile Get(this List<Tile> tiles, int x, int y) => tiles.Get(new Point(x, y));
+        public static VisualObject Get(this List<VisualObject> tiles, int x, int y) => tiles.Get(new Point(x, y));
 
-        public static Tile Get(this List<Tile> tiles, Point loc) => tiles.Where(x => (int)x.Location.X == (int)loc.X && (int)x.Location.Y == (int)loc.Y).First();
+        public static VisualObject Get(this List<VisualObject> tiles, Point loc) => tiles.Where(x => (int)x.Location.X == (int)loc.X && (int)x.Location.Y == (int)loc.Y).First();
+
+        public static T GetWorldPoint<T>(this XYContainer<T> cont, int x, int y) where T : VisualObject => cont.GetWorldPoint(new Point(x, y));
+
+        public static T GetWorldPoint<T>(this XYContainer<T> cont, Point loc) where T : VisualObject
+        {
+            for (int y = 0; y < cont.Count(false); y++)
+            {
+                for (int x = 0; x < cont.Count(true); x++)
+                {
+                    var obj = cont.Get(x, y);
+                    if (obj.Location == loc) return obj;
+                }
+            }
+            return null;
+        }
     }
 }
