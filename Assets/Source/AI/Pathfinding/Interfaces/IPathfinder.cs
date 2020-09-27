@@ -9,6 +9,6 @@ namespace dEvine_and_conquer.AI.Pathfinding.Interfaces
     {
         List<Tile> GetPath(Point start, Point end);
         //void UpdateWorld(XYContainer<Tile> tiles);
-        void UpdateWorld(List<Tile> tiles);
+        void UpdateWorld(List<Tile> tiles, List<Overlay> overlays);
     }
 }

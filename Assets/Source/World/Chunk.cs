@@ -62,7 +62,7 @@ namespace dEvine_and_conquer.World
 
         public bool Contains(Point loc)
         {
-            return Contains((int)loc.X, (int)loc.Y);
+            return Contains(loc.X.Floor(), loc.Y.Floor());
         }
 
         public bool Contains(int x, int y) =>

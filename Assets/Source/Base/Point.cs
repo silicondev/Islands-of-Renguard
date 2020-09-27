@@ -47,5 +47,11 @@ namespace dEvine_and_conquer.Base
             hash = hash * 59 + Y.GetHashCode();
             return hash;
         }
+
+        public void Move(float x, float y)
+        {
+            X += x;
+            Y += y;
+        }
     }
 }

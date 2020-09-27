@@ -21,6 +21,7 @@ namespace dEvine_and_conquer.AI.Pathfinding.AStar
         private float _maxScopeVal = 100;
         private int _scopeDiv = 2;
         private List<Tile> _tiles;
+        private List<Overlay> _overlays;
         private List<AStarTile> _gridHold;
         private List<AStarTile> _grid
         {
@@ -30,9 +31,10 @@ namespace dEvine_and_conquer.AI.Pathfinding.AStar
                 return _gridHold;
             }
         }
-        public AStarPathfinder(List<Tile> tiles)
+        public AStarPathfinder(List<Tile> tiles, List<Overlay> overlays)
         {
             _tiles = tiles;
+            _overlays = overlays;
         }
 
         public AStarPathfinder()
@@ -44,17 +46,23 @@ namespace dEvine_and_conquer.AI.Pathfinding.AStar
         {
             List<AStarTile> tmp = new List<AStarTile>();
 
-            foreach (var tile in _tiles)
+            for (int y = _tiles.MinValue(yt => yt.Location.Y).Floor(); y < _tiles.MaxValue(yt => yt.Location.Y).Floor(); y++)
             {
-                tmp.Add(new AStarTile(tile));
+                for (int x = _tiles.MinValue(xt => xt.Location.X).Floor(); x < _tiles.MaxValue(xt => xt.Location.X).Floor(); x++)
+                {
+                    var tile = _tiles.Get(x, y);
+                    var overlay = _overlays.Get(x, y);
+                    tmp.Add(new AStarTile(tile, overlay));
+                }
             }
 
             _gridHold = tmp;
         }
 
-        public void UpdateWorld(List<Tile> tiles)
+        public void UpdateWorld(List<Tile> tiles, List<Overlay> overlays)
         {
             _tiles = tiles;
+            _overlays = overlays;
             _gridHold = null;
         }
 

@@ -5,10 +5,11 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using dEvine_and_conquer.Entity;
+using dEvine_and_conquer.Base;
 
 namespace dEvine_and_conquer.Scripts
 {
-    public class EntityManager : MonoBehaviour
+    public class EntityManager : Script
     {
         public EntityManager Instance { get; private set; }
         public GenericEntity Entity { get; set; }
@@ -31,7 +32,7 @@ namespace dEvine_and_conquer.Scripts
 
         private void Update()
         {
-            transform.position = new Vector3(Entity.Location.X, Entity.Location.Y, -0.2F);
+            Move(Entity.Location);
         }
     }
 }

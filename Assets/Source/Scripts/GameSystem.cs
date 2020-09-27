@@ -106,7 +106,10 @@ namespace dEvine_and_conquer.Scripts
 
             var playerObj = GameObject.FindWithTag("Player");
             if (playerObj != null)
+            {
                 Player = playerObj.GetComponent<PlayerManager>();
+                Player.Location = new Point(0, 0);
+            }
             else
                 Debug.LogError("Could not find Player Object");
 
@@ -184,8 +187,10 @@ namespace dEvine_and_conquer.Scripts
                 if (found.Any())
                 {
                     var chunk = found.First();
-                    var tile = chunk.Tiles.GetWorldPoint((int)flatPos.X, (int)flatPos.Y);
-                    var overlay = chunk.Overlays.GetWorldPoint((int)flatPos.X, (int)flatPos.Y);
+                    var x = flatPos.X.Floor();
+                    var y = flatPos.Y.Floor();
+                    var tile = chunk.Tiles.GetWorldPoint(x, y);
+                    var overlay = chunk.Overlays.GetWorldPoint(x, y);
                     Debug.Log(string.Format("Tile: {0}. Overlay: {1}", tile.Type.Name, overlay.Type.Name));
 
                     SelectedTile = tile.Location;
