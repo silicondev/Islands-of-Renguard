@@ -20,8 +20,9 @@ namespace dEvine_and_conquer.AI.Pathfinding.AStar
         private AStarTile _end;
         private float _maxScopeVal = 100;
         private int _scopeDiv = 2;
-        private List<Tile> _tiles;
-        private List<Overlay> _overlays;
+        //private List<Tile> _tiles;
+        //private List<Overlay> _overlays;
+        private List<Block> _blocks;
         private List<AStarTile> _gridHold;
         private List<AStarTile> _grid
         {
@@ -31,10 +32,15 @@ namespace dEvine_and_conquer.AI.Pathfinding.AStar
                 return _gridHold;
             }
         }
-        public AStarPathfinder(List<Tile> tiles, List<Overlay> overlays)
+        //public AStarPathfinder(List<Tile> tiles, List<Overlay> overlays)
+        //{
+        //    _tiles = tiles;
+        //    _overlays = overlays;
+        //}
+
+        public AStarPathfinder(List<Block> blocks)
         {
-            _tiles = tiles;
-            _overlays = overlays;
+            _blocks = blocks;
         }
 
         public AStarPathfinder()
@@ -42,35 +48,56 @@ namespace dEvine_and_conquer.AI.Pathfinding.AStar
 
         }
 
+        //private void ReloadGrid()
+        //{
+        //    List<AStarTile> tmp = new List<AStarTile>();
+
+        //    for (int y = _tiles.MinValue(yt => yt.Location.Y).Floor(); y < _tiles.MaxValue(yt => yt.Location.Y).Floor(); y++)
+        //    {
+        //        for (int x = _tiles.MinValue(xt => xt.Location.X).Floor(); x < _tiles.MaxValue(xt => xt.Location.X).Floor(); x++)
+        //        {
+        //            var tile = _tiles.Get(x, y);
+        //            var overlay = _overlays.Get(x, y);
+        //            tmp.Add(new AStarTile(tile, overlay));
+        //        }
+        //    }
+
+        //    _gridHold = tmp;
+        //}
+
         private void ReloadGrid()
         {
             List<AStarTile> tmp = new List<AStarTile>();
 
-            for (int y = _tiles.MinValue(yt => yt.Location.Y).Floor(); y < _tiles.MaxValue(yt => yt.Location.Y).Floor(); y++)
+            foreach (var block in _blocks)
             {
-                for (int x = _tiles.MinValue(xt => xt.Location.X).Floor(); x < _tiles.MaxValue(xt => xt.Location.X).Floor(); x++)
-                {
-                    var tile = _tiles.Get(x, y);
-                    var overlay = _overlays.Get(x, y);
-                    tmp.Add(new AStarTile(tile, overlay));
-                }
+                tmp.Add(new AStarTile(block));
             }
 
             _gridHold = tmp;
         }
 
-        public void UpdateWorld(List<Tile> tiles, List<Overlay> overlays)
+        //public void UpdateWorld(List<Tile> tiles, List<Overlay> overlays)
+        //{
+        //    _tiles = tiles;
+        //    _overlays = overlays;
+        //    _gridHold = null;
+        //}
+
+        public void UpdateWorld(List<Block> blocks)
         {
-            _tiles = tiles;
-            _overlays = overlays;
+            _blocks = blocks;
             _gridHold = null;
         }
 
-        public List<Tile> GetPath(Point start, Point end)
+        //public List<Tile> GetPath(Point start, Point end)
+        public List<Block> GetPath(Point start, Point end)
         {
             if (_grid == null) ReloadGrid();
 
-            if (_tiles == null)
+            //if (_tiles == null)
+            //    return null;
+            if (_blocks == null)
                 return null;
 
             _openSet.Clear();
@@ -119,10 +146,12 @@ namespace dEvine_and_conquer.AI.Pathfinding.AStar
                         _path.Add(tmp.Prev);
                         tmp = tmp.Prev;
                     }
-                    List<Tile> output = new List<Tile>();
+                    //List<Tile> output = new List<Tile>();
+                    List<Block> output = new List<Block>();
                     foreach (var i in _path)
                     {
-                        output.Add(i.Tile);
+                        //output.Add(i.Tile);
+                        output.Add(i.Block);
                     }
                     output.Reverse();
                     return output;
@@ -171,10 +200,10 @@ namespace dEvine_and_conquer.AI.Pathfinding.AStar
 
         private float _heuristic(AStarTile a, AStarTile b)
         {
-            int ax = (int)a.Tile.Location.X;
-            int ay = (int)a.Tile.Location.Y;
-            int bx = (int)b.Tile.Location.X;
-            int by = (int)b.Tile.Location.Y;
+            int ax = a.Location.X.Floor();
+            int ay = a.Location.Y.Floor();
+            int bx = b.Location.X.Floor();
+            int by = b.Location.Y.Floor();
 
             double x = Math.Pow(_difference(ax, bx), 2);
             double y = Math.Pow(_difference(ay, by), 2);

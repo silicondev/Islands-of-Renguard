@@ -24,7 +24,8 @@ namespace dEvine_and_conquer.Entity
         private int _animRefresh = 150;
         public Point GoingTo;
         public bool isMoving = false;
-        protected List<Tile> currentPath;
+        //protected List<Tile> currentPath;
+        protected List<Block> currentPath;
         protected int pathProgress = 0;
         private float _moveSpeed = 5.0F;
 
@@ -89,24 +90,31 @@ namespace dEvine_and_conquer.Entity
             if (destination == Location) return;
 
             var chunks = system.LoadedChunks;
-            List<Tile> tiles = new List<Tile>();
-            List<Overlay> overlays = new List<Overlay>();
+            //List<Tile> tiles = new List<Tile>();
+            //List<Overlay> overlays = new List<Overlay>();
 
+            //foreach (var chunk in chunks)
+            //{
+            //    var cTiles = chunk.Tiles;
+            //    var cOverlays = chunk.Overlays;
+            //    for (int y = 0; y < cTiles.Count(false); y++)
+            //    {
+            //        for (int x = 0; x < cTiles.Count(true); x++)
+            //        {
+            //            tiles.Add(cTiles.Get(x, y));
+            //            overlays.Add(cOverlays.Get(x, y));
+            //        }
+            //    }
+            //}
+
+            List<Block> blocks = new List<Block>();
             foreach (var chunk in chunks)
             {
-                var cTiles = chunk.Tiles;
-                var cOverlays = chunk.Overlays;
-                for (int y = 0; y < cTiles.Count(false); y++)
-                {
-                    for (int x = 0; x < cTiles.Count(true); x++)
-                    {
-                        tiles.Add(cTiles.Get(x, y));
-                        overlays.Add(cOverlays.Get(x, y));
-                    }
-                }
+                blocks.AddRange(chunk.Blocks);
             }
 
-            Pathfinder.UpdateWorld(tiles, overlays);
+            //Pathfinder.UpdateWorld(tiles, overlays);
+            Pathfinder.UpdateWorld(blocks);
             currentPath = Pathfinder.GetPath(Location, destination);
             isMoving = true;
             Debug.Log(string.Format("{0} Entity is moving from {1},{2} to {3},{4}", Type.Name, Location.X.ToString(), Location.Y.ToString(), destination.X.ToString(), destination.Y.ToString()));

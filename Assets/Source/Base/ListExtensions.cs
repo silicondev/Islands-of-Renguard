@@ -70,35 +70,58 @@ namespace dEvine_and_conquer.Base
             return chunks.GetChunkWithPosition(new Point(x, y));
         }
 
-        public static Tile GetTileFromID(this List<Chunk> chunks, Point id)
+        //public static Tile GetTileFromID(this List<Chunk> chunks, Point id)
+        //{
+        //    var x = (int)id.X;
+        //    var y = (int)id.Y;
+
+        //    foreach (var chunk in chunks)
+        //    {
+        //        var tiles = chunk.Tiles;
+        //        if (tiles == null || tiles.Get(0, 0) == null)
+        //            continue;
+
+        //        var chunkX = (int)chunk.ID.X * 16;
+        //        var chunkY = (int)chunk.ID.Y * 16;
+
+        //        if (x >= chunkX && x < chunkX + 16 && y >= chunkY && y < chunkY + 16)
+        //        {
+        //            var tileX = (int)id.X - chunkX;
+        //            var tileY = (int)id.Y - chunkY;
+
+        //            return tiles.Get(tileX, tileY);
+        //        }
+        //    }
+
+        //    return null;
+        //}
+
+        public static Block GetBlockFromID(this List<Chunk> chunks, Point id)
         {
             var x = (int)id.X;
             var y = (int)id.Y;
 
             foreach (var chunk in chunks)
             {
-                var tiles = chunk.Tiles;
-                if (tiles == null || tiles.Get(0, 0) == null)
-                    continue;
+                if (!chunk.Contains(id)) continue;
 
-                var chunkX = (int)chunk.ID.X * 16;
-                var chunkY = (int)chunk.ID.Y * 16;
-
-                if (x >= chunkX && x < chunkX + 16 && y >= chunkY && y < chunkY + 16)
+                foreach (var block in chunk.Blocks)
                 {
-                    var tileX = (int)id.X - chunkX;
-                    var tileY = (int)id.Y - chunkY;
-
-                    return tiles.Get(tileX, tileY);
+                    if (block.Location == id) return block;
                 }
             }
 
             return null;
         }
 
-        public static Tile GetTileFromID(this List<Chunk> chunks, int x, int y)
+        //public static Tile GetTileFromID(this List<Chunk> chunks, int x, int y)
+        //{
+        //    return chunks.GetTileFromID(new Point(x, y));
+        //}
+
+        public static Block GetBlockFromID(this List<Chunk> chunks, int x, int y)
         {
-            return chunks.GetTileFromID(new Point(x, y));
+            return chunks.GetBlockFromID(new Point(x, y));
         }
 
         public static bool AddEntityToWorld(this List<Chunk> chunks, GenericEntity entity)
@@ -135,23 +158,26 @@ namespace dEvine_and_conquer.Base
         public static float MinValue<T>(this List<T> list, Func<T, float> prop) => prop(list.Aggregate((i1, i2) => prop(i1) < prop(i2) ? i1 : i2));
         public static float MaxValue<T>(this List<T> list, Func<T, float> prop) => prop(list.Aggregate((i1, i2) => prop(i1) > prop(i2) ? i1 : i2));
 
-        public static VisualObject Get(this List<VisualObject> tiles, int x, int y) => tiles.Get(new Point(x, y));
+        public static T Get<T>(this List<T> tiles, int x, int y) where T : VisualObject => tiles.Get(new Point(x, y));
 
-        public static VisualObject Get(this List<VisualObject> tiles, Point loc) => tiles.Where(x => (int)x.Location.X == (int)loc.X && (int)x.Location.Y == (int)loc.Y).First();
+        public static T Get<T>(this List<T> tiles, Point loc) where T : VisualObject => tiles.Where(x => x.Location == loc).First();
+        public static T Get<T>(this T[] tiles, int x, int y) where T : VisualObject => tiles.Get(new Point(x, y));
 
-        public static T GetWorldPoint<T>(this XYContainer<T> cont, int x, int y) where T : VisualObject => cont.GetWorldPoint(new Point(x, y));
+        public static T Get<T>(this T[] tiles, Point loc) where T : VisualObject => tiles.Where(x => x.Location == loc).First();
 
-        public static T GetWorldPoint<T>(this XYContainer<T> cont, Point loc) where T : VisualObject
-        {
-            for (int y = 0; y < cont.Count(false); y++)
-            {
-                for (int x = 0; x < cont.Count(true); x++)
-                {
-                    var obj = cont.Get(x, y);
-                    if (obj.Location == loc) return obj;
-                }
-            }
-            return null;
-        }
+        //public static T GetWorldPoint<T>(this XYContainer<T> cont, int x, int y) where T : VisualObject => cont.GetWorldPoint(new Point(x, y));
+
+        //public static T GetWorldPoint<T>(this XYContainer<T> cont, Point loc) where T : VisualObject
+        //{
+        //    for (int y = 0; y < cont.Count(false); y++)
+        //    {
+        //        for (int x = 0; x < cont.Count(true); x++)
+        //        {
+        //            var obj = cont.Get(x, y);
+        //            if (obj.Location == loc) return obj;
+        //        }
+        //    }
+        //    return null;
+        //}
     }
 }

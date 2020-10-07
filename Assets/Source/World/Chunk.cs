@@ -29,8 +29,9 @@ namespace dEvine_and_conquer.World
         }
 
         private Generator _generator;
-        public XYContainer<Tile> Tiles { get; private set; } = new List<List<Tile>>();
-        public XYContainer<Overlay> Overlays { get; private set; } = new List<List<Overlay>>();
+        //public XYContainer<Tile> Tiles { get; private set; } = new List<List<Tile>>();
+        //public XYContainer<Overlay> Overlays { get; private set; } = new List<List<Overlay>>();
+        public Block[] Blocks;
         public List<GameObject> Objects { get; set; } = new List<GameObject>();
         public List<GenericEntity> Entities { get; } = new List<GenericEntity>();
         public GameObject Object { get; set; }
@@ -55,9 +56,10 @@ namespace dEvine_and_conquer.World
 
         public void Generate()
         {
-            var gen = _generator.GenerateChunk(ID);
-            Tiles = gen.Tiles;
-            Overlays = gen.Overlays;
+            //var gen = _generator.GenerateChunk(ID);
+            //Tiles = gen.Tiles;
+            //Overlays = gen.Overlays;
+            Blocks = _generator.GenerateChunk(ID);
         }
 
         public bool Contains(Point loc)

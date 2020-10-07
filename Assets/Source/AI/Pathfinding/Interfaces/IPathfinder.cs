@@ -7,8 +7,10 @@ namespace dEvine_and_conquer.AI.Pathfinding.Interfaces
 {
     public interface IPathfinder
     {
-        List<Tile> GetPath(Point start, Point end);
+        //List<Tile> GetPath(Point start, Point end);
+        List<Block> GetPath(Point start, Point end);
         //void UpdateWorld(XYContainer<Tile> tiles);
-        void UpdateWorld(List<Tile> tiles, List<Overlay> overlays);
+        //void UpdateWorld(List<Tile> tiles, List<Overlay> overlays);
+        void UpdateWorld(List<Block> blocks);
     }
 }

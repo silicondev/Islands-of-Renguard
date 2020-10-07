@@ -27,40 +27,42 @@ namespace dEvine_and_conquer.Scripts
         public bool TileSelected { get; set; } = false;
         public Point SelectedTile { get; private set; }
 
-        public XYContainer<Chunk> LoadedChunks2D
-        {
-            get
-            {
-                if (_loadedChunks2DHold == null)
-                {
-                    int lowestX = (int)LoadedChunks.MinValue(c => c.ID.X);
-                    int lowestY = (int)LoadedChunks.MinValue(c => c.ID.Y);
-                    int heighestX = (int)LoadedChunks.MaxValue(c => c.ID.X);
-                    int heighestY = (int)LoadedChunks.MaxValue(c => c.ID.Y);
+        //public XYContainer<Chunk> LoadedChunks2D
+        //{
+        //    get
+        //    {
+        //        if (_loadedChunks2DHold == null)
+        //        {
+        //            int lowestX = (int)LoadedChunks.MinValue(c => c.ID.X);
+        //            int lowestY = (int)LoadedChunks.MinValue(c => c.ID.Y);
+        //            int heighestX = (int)LoadedChunks.MaxValue(c => c.ID.X);
+        //            int heighestY = (int)LoadedChunks.MaxValue(c => c.ID.Y);
 
-                    XYContainer<Chunk> chunks2D = new List<List<Chunk>>();
-                    for (int y = lowestY; y < heighestY; y++)
-                    {
-                        chunks2D.AddLine();
-                        for (int x = lowestX; x < heighestX; x++)
-                        {
-                            chunks2D.Add(LoadedChunks.GetChunk(x, y));
-                        }
-                    }
+        //            XYContainer<Chunk> chunks2D = new List<List<Chunk>>();
+        //            for (int y = lowestY; y < heighestY; y++)
+        //            {
+        //                chunks2D.AddLine();
+        //                for (int x = lowestX; x < heighestX; x++)
+        //                {
+        //                    chunks2D.Add(LoadedChunks.GetChunk(x, y));
+        //                }
+        //            }
 
-                    _loadedChunks2DHold = chunks2D;
-                }
+        //            _loadedChunks2DHold = chunks2D;
+        //        }
 
-                return _loadedChunks2DHold;
-            }
-        }
+        //        return _loadedChunks2DHold;
+        //    }
+        //}
 
-        private XYContainer<Chunk> _loadedChunks2DHold = null;
+        //private XYContainer<Chunk> _loadedChunks2DHold = null;
 
         private Chunk _current;
 
-        public Tile CurrentTile => LoadedChunks.GetTileFromID(new Point((int)Math.Floor(Player.Location.X), (int)Math.Floor(Player.Location.Y)));
-        public Tile StartTile = null;
+        //public Tile CurrentTile => LoadedChunks.GetTileFromID(new Point((int)Math.Floor(Player.Location.X), (int)Math.Floor(Player.Location.Y)));
+        public Block CurrentBlock => LoadedChunks.GetBlockFromID(Player.Location);
+        //public Tile StartTile = null;
+        public Block StartBlock = null;
         void Awake()
         {
             Instance = this;
@@ -189,11 +191,14 @@ namespace dEvine_and_conquer.Scripts
                     var chunk = found.First();
                     var x = flatPos.X.Floor();
                     var y = flatPos.Y.Floor();
-                    var tile = chunk.Tiles.GetWorldPoint(x, y);
-                    var overlay = chunk.Overlays.GetWorldPoint(x, y);
-                    Debug.Log(string.Format("Tile: {0}. Overlay: {1}", tile.Type.Name, overlay.Type.Name));
+                    //var tile = chunk.Tiles.GetWorldPoint(x, y);
+                    //var overlay = chunk.Overlays.GetWorldPoint(x, y);
+                    var block = chunk.Blocks.Get(x, y);
+                    //Debug.Log(string.Format("Tile: {0}. Overlay: {1}", tile.Type.Name, overlay.Type.Name));
+                    Debug.Log(string.Format("Tile: {0}. Overlay: {1}", block.Tile.Type.Name, block.Overlay.Type.Name));
 
-                    SelectedTile = tile.Location;
+                    //SelectedTile = tile.Location;
+                    SelectedTile = block.Location;
                     TileSelected = true;
                     ForceRegen();
                 } else
@@ -204,7 +209,8 @@ namespace dEvine_and_conquer.Scripts
         private void StartupGenerate()
         {
             RegenChunks();
-            StartTile = CurrentTile;
+            //StartTile = CurrentTile;
+            StartBlock = CurrentBlock;
         }
 
         public void CreateEntity(GenericEntity entity)
@@ -224,7 +230,7 @@ namespace dEvine_and_conquer.Scripts
         /// </summary>
         private void RegenChunks()
         {
-            _loadedChunks2DHold = null;
+            //_loadedChunks2DHold = null;
             int posX = (int)Player.Location.X;
             int posY = (int)Player.Location.Y;
 
@@ -326,22 +332,33 @@ namespace dEvine_and_conquer.Scripts
                 chunk.Objects.Add(selector);
             }
 
-            for (int y = 0; y < chunk.Tiles.Count(false); y++)
+            //for (int y = 0; y < chunk.Tiles.Count(false); y++)
+            //{
+            //    for (int x = 0; x < chunk.Tiles.Count(true); x++)
+            //    {
+            //        var tile = chunk.Tiles.Get(x, y);
+            //        var overlay = chunk.Overlays.Get(x, y);
+
+
+            //        GameObject obj = CreateObject(tile.Type.Name, tile.Location, 0, chunk.Object);
+            //        chunk.Objects.Add(obj);
+
+            //        if (overlay.Type != ObjectID.ENV_OVERLAY.VOID)
+            //        {
+            //            GameObject overlayObj = CreateObject(overlay.Type.Name, overlay.Location, -0.1f, chunk.Object);
+            //            chunk.Objects.Add(overlayObj);
+            //        }
+            //    }
+            //}
+            foreach (var block in chunk.Blocks)
             {
-                for (int x = 0; x < chunk.Tiles.Count(true); x++)
+                GameObject obj = CreateObject(block.Tile.Type.Name, block.Location, 0, chunk.Object);
+                chunk.Objects.Add(obj);
+
+                if (block.Overlay.Type != ObjectID.ENV_OVERLAY.VOID)
                 {
-                    var tile = chunk.Tiles.Get(x, y);
-                    var overlay = chunk.Overlays.Get(x, y);
-
-
-                    GameObject obj = CreateObject(tile.Type.Name, tile.Location, 0, chunk.Object);
-                    chunk.Objects.Add(obj);
-
-                    if (overlay.Type != TileID.ENV_OVERLAY.VOID)
-                    {
-                        GameObject overlayObj = CreateObject(overlay.Type.Name, overlay.Location, -0.1f, chunk.Object);
-                        chunk.Objects.Add(overlayObj);
-                    }
+                    GameObject overlayObj = CreateObject(block.Overlay.Type.Name, block.Location, -0.1f, chunk.Object);
+                    chunk.Objects.Add(overlayObj);
                 }
             }
 

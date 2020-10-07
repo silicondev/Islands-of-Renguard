@@ -8,6 +8,10 @@ namespace dEvine_and_conquer.Base
 {
     public static class NumberExtensions
     {
-        public static int Floor(this float val) => (int)Math.Floor(val);
+        public static int Floor(this float val)
+        {
+            if (val == (int)val) return (int)val;
+            return (int)Math.Floor(val);
+        }
     }
 }
