@@ -46,13 +46,11 @@ namespace dEvine_and_conquer.Scripts
         private void MoveLeft() => Location.Move(MoveSpeed / -1, 0);
         private void MoveDown() => Location.Move(0, MoveSpeed / -1);
 
-        // Start is called before the first frame update
         private void Start()
         {
             TargetZoom = _defaultZoom;
         }
 
-        // Update is called once per frame
         private void Update()
         {
             if (CurrentZoom != TargetZoom) CurrentZoom = Mathf.MoveTowards(CurrentZoom, TargetZoom, SmoothSpeed * Time.deltaTime);

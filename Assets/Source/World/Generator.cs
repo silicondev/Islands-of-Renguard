@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
-using Random = UnityEngine.Random;
+using Random = System.Random;
 
 namespace dEvine_and_conquer.World
 {
@@ -18,7 +18,7 @@ namespace dEvine_and_conquer.World
         public float Seed { get; }
         public int ChunkSize { get; }
         public WorldMapper Mapper { get; private set; }
-        private System.Random _rand;
+        private Random _rand;
         private bool _genTree = true;
 
         public Generator(float scale, float seed, int chunkSize, WorldMapper mapper)
@@ -26,12 +26,11 @@ namespace dEvine_and_conquer.World
             Scale = scale;
             if (seed - (int)seed == 0) seed += 0.1F;
             Seed = seed;
-            _rand = new System.Random((int)seed);
+            _rand = new Random((int)seed);
             ChunkSize = chunkSize;
             Mapper = mapper;
         }
 
-        //public ChunkData GenerateChunk(Point id)
         public Block[] GenerateChunk(Point id)
         {
             int xChunkPos = (int)id.X * ChunkSize;
@@ -39,15 +38,11 @@ namespace dEvine_and_conquer.World
             float xStart = Seed + xChunkPos;
             float yStart = Seed + yChunkPos;
 
-            //var tiles = new List<List<Tile>>();
-            //var overlays = new List<List<Overlay>>();
             Block[] blocks = new Block[ChunkSize * ChunkSize];
             int i = 0;
 
             for (int y = 0; y < ChunkSize; y++)
             {
-                //tiles.Add(new List<Tile>());
-                //overlays.Add(new List<Overlay>());
                 for (int x = 0; x < ChunkSize; x++)
                 {
                     int xPos = x + xChunkPos;
@@ -56,27 +51,17 @@ namespace dEvine_and_conquer.World
                     float perlinY = (y + yStart) * Scale;
                     float height = Mathf.PerlinNoise(perlinX, perlinY) * 255;
 
-                    //Tile tile = new Tile(Mapper.ParseHeight(height), height, xPos, yPos);
-                    //Overlay overlay = new Overlay(ObjectID.ENV_OVERLAY.VOID, xPos, yPos);
-
-                    //if (tile.Type == ObjectID.ENV.GRASS && TreeGen(new Point(perlinX, perlinY), height)) overlay.Type = ObjectID.ENV_OVERLAY.TREE;
-
                     Prefab tile = Mapper.ParseHeight(height);
                     Prefab overlay =
-                        tile == ObjectID.ENV.GRASS &&
+                        tile == ObjectID.ENV.TILE.GRASS &&
                         TreeGen(new Point(perlinX, perlinY), height) ?
-                            ObjectID.ENV_OVERLAY.TREE :
-                            ObjectID.ENV_OVERLAY.VOID;
+                            ObjectID.ENV.OVERLAY.TREE :
+                            ObjectID.ENV.VOID;
 
                     blocks[i] = new Block(xPos, yPos, tile, height, overlay);
                     i++;
-
-                    //overlays[y].Add(overlay);
-                    //tiles[y].Add(tile);
                 }
             }
-            //ChunkData output = new ChunkData(tiles, overlays);
-            //return output;
             return blocks;
         }
 
@@ -115,16 +100,4 @@ namespace dEvine_and_conquer.World
 
         private bool IsEven(int val) => (val % 2) == 0;
     }
-
-    //public class ChunkData
-    //{
-    //    public XYContainer<Tile> Tiles { get; }
-    //    public XYContainer<Overlay> Overlays { get; }
-
-    //    public ChunkData(XYContainer<Tile> tiles, XYContainer<Overlay> overlays)
-    //    {
-    //        Tiles = tiles;
-    //        Overlays = overlays;
-    //    }
-    //}
 }

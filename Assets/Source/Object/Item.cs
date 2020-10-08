@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace dEvine_and_conquer.Object
 {
-    public class Item
+    public class ItemBag
     {
-        public ID Id { get; } = 0;
+        public Prefab Id { get; }
         public int Amount { 
             get
             {
@@ -50,36 +50,14 @@ namespace dEvine_and_conquer.Object
             }
         }
         public int _existing = 1;
-
-        public Item() { }
-        public Item(ID id)
+        public ItemBag(Prefab id)
         {
             Id = id;
         }
-        public Item(ID id, int amount)
+        public ItemBag(Prefab id, int amount)
         {
             Id = id;
             Amount = amount;
         }
-    }
-
-    public static class ItemID
-    {
-        public static class GENERIC
-        {
-            public static readonly ID VOID = 0;
-        }
-        //public static class WEAPON
-        //{
-        //    
-        //}
-        //public static class TOOL
-        //{
-        //
-        //}
-        //public static class BUILDABLE
-        //{
-        //
-        //}
     }
 }

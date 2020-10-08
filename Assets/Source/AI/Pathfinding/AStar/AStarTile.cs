@@ -15,27 +15,9 @@ namespace dEvine_and_conquer.AI.Pathfinding.AStar
         public float h = 0;
         public List<AStarTile> Local = new List<AStarTile>();
         public AStarTile Prev { get; set; } = null;
-        //public Tile Tile { get; }
-        //public Overlay Overlay { get; }
         public Block Block { get; }
-
-        //public bool IsWall 
-        //{ 
-        //    get
-        //    {
-        //        if (Tile.Type.IsCollidable)
-        //            return true;
-        //        else
-        //            return Overlay.Type.IsCollidable;
-        //    } 
-        //}
         public bool IsWall => Block.IsCollidable;
 
-        //public AStarTile(Tile tile, Overlay overlay) : base(tile.Location.X.Floor(), tile.Location.Y.Floor())
-        //{
-        //    Tile = tile;
-        //    Overlay = overlay;
-        //}
         public AStarTile(Block block) : base(block.Location)
         {
             Block = block;
@@ -43,8 +25,6 @@ namespace dEvine_and_conquer.AI.Pathfinding.AStar
 
         public void RefreshLocal(List<AStarTile> grid)
         {
-            //int x = (int)Tile.Location.X;
-            //int y = (int)Tile.Location.Y;
             int x = Block.Location.X.Floor();
             int y = Block.Location.Y.Floor();
 

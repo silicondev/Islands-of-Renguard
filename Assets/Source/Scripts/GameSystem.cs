@@ -27,41 +27,9 @@ namespace dEvine_and_conquer.Scripts
         public bool TileSelected { get; set; } = false;
         public Point SelectedTile { get; private set; }
 
-        //public XYContainer<Chunk> LoadedChunks2D
-        //{
-        //    get
-        //    {
-        //        if (_loadedChunks2DHold == null)
-        //        {
-        //            int lowestX = (int)LoadedChunks.MinValue(c => c.ID.X);
-        //            int lowestY = (int)LoadedChunks.MinValue(c => c.ID.Y);
-        //            int heighestX = (int)LoadedChunks.MaxValue(c => c.ID.X);
-        //            int heighestY = (int)LoadedChunks.MaxValue(c => c.ID.Y);
-
-        //            XYContainer<Chunk> chunks2D = new List<List<Chunk>>();
-        //            for (int y = lowestY; y < heighestY; y++)
-        //            {
-        //                chunks2D.AddLine();
-        //                for (int x = lowestX; x < heighestX; x++)
-        //                {
-        //                    chunks2D.Add(LoadedChunks.GetChunk(x, y));
-        //                }
-        //            }
-
-        //            _loadedChunks2DHold = chunks2D;
-        //        }
-
-        //        return _loadedChunks2DHold;
-        //    }
-        //}
-
-        //private XYContainer<Chunk> _loadedChunks2DHold = null;
-
         private Chunk _current;
 
-        //public Tile CurrentTile => LoadedChunks.GetTileFromID(new Point((int)Math.Floor(Player.Location.X), (int)Math.Floor(Player.Location.Y)));
         public Block CurrentBlock => LoadedChunks.GetBlockFromID(Player.Location);
-        //public Tile StartTile = null;
         public Block StartBlock = null;
         void Awake()
         {
@@ -89,7 +57,7 @@ namespace dEvine_and_conquer.Scripts
 
                 { "overlay:tree", (GameObject)Instantiate(Resources.Load("Prefabs/Overlay/Overlay_Env_Tree"), _prefabObj.transform) },
 
-                { "entity:human", (GameObject)Instantiate(Resources.Load("Prefabs/Entity/Human/Entity_Human_Male"), _prefabObj.transform) },
+                { "entity:human.friendly.male", (GameObject)Instantiate(Resources.Load("Prefabs/Entity/Human/Entity_Human_Male"), _prefabObj.transform) },
 
                 { "ui:selector", (GameObject)Instantiate(Resources.Load("Prefabs/UI/UI_Selector"), _prefabObj.transform) }
             };
@@ -184,32 +152,28 @@ namespace dEvine_and_conquer.Scripts
 
                 var flatPos = new Point(worldPos.x, worldPos.y);
 
-                List<Chunk> found = LoadedChunks.Where(x => x.Contains(flatPos)).ToList();
+                var chunk = LoadedChunks.Contains(flatPos);
 
-                if (found.Any())
+                if (chunk == null)
                 {
-                    var chunk = found.First();
-                    var x = flatPos.X.Floor();
-                    var y = flatPos.Y.Floor();
-                    //var tile = chunk.Tiles.GetWorldPoint(x, y);
-                    //var overlay = chunk.Overlays.GetWorldPoint(x, y);
-                    var block = chunk.Blocks.Get(x, y);
-                    //Debug.Log(string.Format("Tile: {0}. Overlay: {1}", tile.Type.Name, overlay.Type.Name));
-                    Debug.Log(string.Format("Tile: {0}. Overlay: {1}", block.Tile.Type.Name, block.Overlay.Type.Name));
-
-                    //SelectedTile = tile.Location;
-                    SelectedTile = block.Location;
-                    TileSelected = true;
-                    ForceRegen();
-                } else
                     Debug.Log("ERROR: Could not find object.");
+                    return;
+                }
+
+                var x = flatPos.X.Floor();
+                var y = flatPos.Y.Floor();
+                var block = chunk.Blocks.Get(x, y);
+                Debug.Log(string.Format("Tile: {0}. Overlay: {1}", block.Tile.Type.Name, block.Overlay.Type.Name));
+
+                SelectedTile = block.Location;
+                TileSelected = true;
+                ForceRegen();
             }
         }
 
         private void StartupGenerate()
         {
             RegenChunks();
-            //StartTile = CurrentTile;
             StartBlock = CurrentBlock;
         }
 
@@ -230,7 +194,6 @@ namespace dEvine_and_conquer.Scripts
         /// </summary>
         private void RegenChunks()
         {
-            //_loadedChunks2DHold = null;
             int posX = (int)Player.Location.X;
             int posY = (int)Player.Location.Y;
 
@@ -253,11 +216,13 @@ namespace dEvine_and_conquer.Scripts
 
                     // Find chunk if exists
                     var id = new Point((int)Math.Floor(x / 16d), (int)Math.Floor(y / 16d));
-                    var exists = GeneratedChunks.GetChunk(id) != null;
-                    var newChunk = exists ? GeneratedChunks.GetChunk(id) : new Chunk(id, Generator, this);
+                    //var exists = GeneratedChunks.GetChunk(id) != null;
+                    //var newChunk = exists ? GeneratedChunks.GetChunk(id) : new Chunk(id, Generator, this);
+
+                    var newChunk = GeneratedChunks.GetChunk(id) ?? new Chunk(id, Generator, this);
 
                     // Chunk does not already exist, generate a new one.
-                    if (!exists)
+                    if (!newChunk.IsGenerated)
                     {
                         hasNewChunks = true;
                         newChunk.Generate();
@@ -284,14 +249,7 @@ namespace dEvine_and_conquer.Scripts
             }
             RemoveChunks(removeChunks);
 
-            foreach (var chunk in LoadedChunks)
-            {
-                if (chunk.Contains(posX, posY))
-                {
-                    _current = chunk;
-                    break;
-                }
-            }
+            _current = LoadedChunks.Contains(new Point(posX, posY));
 
             LoadedChunks.UpdateAll(this);
         }
@@ -332,39 +290,21 @@ namespace dEvine_and_conquer.Scripts
                 chunk.Objects.Add(selector);
             }
 
-            //for (int y = 0; y < chunk.Tiles.Count(false); y++)
-            //{
-            //    for (int x = 0; x < chunk.Tiles.Count(true); x++)
-            //    {
-            //        var tile = chunk.Tiles.Get(x, y);
-            //        var overlay = chunk.Overlays.Get(x, y);
-
-
-            //        GameObject obj = CreateObject(tile.Type.Name, tile.Location, 0, chunk.Object);
-            //        chunk.Objects.Add(obj);
-
-            //        if (overlay.Type != ObjectID.ENV_OVERLAY.VOID)
-            //        {
-            //            GameObject overlayObj = CreateObject(overlay.Type.Name, overlay.Location, -0.1f, chunk.Object);
-            //            chunk.Objects.Add(overlayObj);
-            //        }
-            //    }
-            //}
             foreach (var block in chunk.Blocks)
             {
-                GameObject obj = CreateObject(block.Tile.Type.Name, block.Location, 0, chunk.Object);
+                GameObject obj = CreateObject(block.Tile.Type.IdName, block.Location, 0, chunk.Object);
                 chunk.Objects.Add(obj);
 
-                if (block.Overlay.Type != ObjectID.ENV_OVERLAY.VOID)
+                if (block.Overlay.Type != ObjectID.ENV.VOID)
                 {
-                    GameObject overlayObj = CreateObject(block.Overlay.Type.Name, block.Location, -0.1f, chunk.Object);
+                    GameObject overlayObj = CreateObject(block.Overlay.Type.IdName, block.Location, -0.1f, chunk.Object);
                     chunk.Objects.Add(overlayObj);
                 }
             }
 
             foreach (var entity in chunk.Entities)
             {
-                GameObject entityObj = CreateObject(entity.Type.Name, entity.Location, -0.2f, chunk.Object);
+                GameObject entityObj = CreateObject(entity.Type.IdName, entity.Location, -0.2f, chunk.Object);
                 entity.Instance = entityObj.AddComponent<EntityManager>();
                 entity.Instance.Entity = entity;
 

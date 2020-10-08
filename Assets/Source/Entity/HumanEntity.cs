@@ -14,7 +14,7 @@ namespace dEvine_and_conquer.Entity
     {
         public int Gender { get; set; }
 
-        public HumanEntity(Point location, int gender) : base(location, EntityID.NPC.HUMAN, 20)
+        public HumanEntity(Point location, int gender) : base(location, ObjectID.ENTITY.NPC.HUMAN.FRIENDLY.MALE, 20)
         {
             Sprite[] spr = Resources.LoadAll<Sprite>("Textures/Entity/Human/Human_Male");
             Sprite tex1 = spr.First(x => x.name == "human_male_idle_1");

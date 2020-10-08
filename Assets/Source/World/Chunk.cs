@@ -29,12 +29,11 @@ namespace dEvine_and_conquer.World
         }
 
         private Generator _generator;
-        //public XYContainer<Tile> Tiles { get; private set; } = new List<List<Tile>>();
-        //public XYContainer<Overlay> Overlays { get; private set; } = new List<List<Overlay>>();
         public Block[] Blocks;
         public List<GameObject> Objects { get; set; } = new List<GameObject>();
         public List<GenericEntity> Entities { get; } = new List<GenericEntity>();
         public GameObject Object { get; set; }
+        public bool IsGenerated { get; private set; } = false;
 
         public Chunk(int x, int y, Generator gen, GameSystem system = null)
         {
@@ -56,10 +55,8 @@ namespace dEvine_and_conquer.World
 
         public void Generate()
         {
-            //var gen = _generator.GenerateChunk(ID);
-            //Tiles = gen.Tiles;
-            //Overlays = gen.Overlays;
             Blocks = _generator.GenerateChunk(ID);
+            IsGenerated = true;
         }
 
         public bool Contains(Point loc)
@@ -79,9 +76,7 @@ namespace dEvine_and_conquer.World
                 entity.Update(system);
                 if (!Contains(entity.Location))
                 {
-                    //GameObject.Destroy(entity.Instance.gameObject);
                     _system.GeneratedChunks.AddEntityToWorld(entity);
-                    //Entities.Remove(entity); //This just despawns the entity if they leave the generated area. This may need fixing.
                     toRemove.Add(entity);
                 }
             }

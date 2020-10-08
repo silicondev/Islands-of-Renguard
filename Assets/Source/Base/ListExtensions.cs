@@ -16,20 +16,14 @@ namespace dEvine_and_conquer.Base
 {
     public static class ListExtensions
     {
+
         /// <summary>
         /// Gets a chunk from the List that matches the id. Returns null if nothing is found.
         /// </summary>
         /// <param name="chunks">The list of chunks to search through.</param>
         /// <param name="id">The id to find.</param>
         /// <returns></returns>
-        public static Chunk GetChunk(this List<Chunk> chunks, Point id)
-        {
-            foreach (var chunk in chunks)
-            {
-                if (chunk.ID == id) return chunk;
-            }
-            return null;
-        }
+        public static Chunk GetChunk(this List<Chunk> chunks, Point id) => chunks.Find(x => x.ID == id);
 
         /// <summary>
         /// Gets a chunk from the List that matches the id. Returns null if nothing is found.
@@ -38,10 +32,7 @@ namespace dEvine_and_conquer.Base
         /// <param name="x">X value of the id to find.</param>
         /// <param name="y">Y value of the id to find.</param>
         /// <returns></returns>
-        public static Chunk GetChunk(this List<Chunk> chunks, int x, int y)
-        {
-            return chunks.GetChunk(new Point(x, y));
-        }
+        public static Chunk GetChunk(this List<Chunk> chunks, int x, int y) => chunks.GetChunk(new Point(x, y));
 
         /// <summary>
         /// Gets a chunk from the List that contains the tile which matches the id. Returns null if nothing is found.
@@ -49,14 +40,7 @@ namespace dEvine_and_conquer.Base
         /// <param name="chunks">The list of chunks to search through.</param>
         /// <param name="id">The id of the tile to find.</param>
         /// <returns></returns>
-        public static Chunk GetChunkWithPosition(this List<Chunk> chunks, Point pos)
-        {
-            foreach (var chunk in chunks)
-            {
-                if (chunk.Contains((int)pos.X, (int)pos.Y)) return chunk;
-            }
-            return null;
-        }
+        public static Chunk GetChunkWithPosition(this List<Chunk> chunks, Point pos) => chunks.Find(x => x.Contains(pos));
 
         /// <summary>
         /// Gets a chunk from the List that contains the tile which matches the id. Returns null if nothing is found.
@@ -65,64 +49,11 @@ namespace dEvine_and_conquer.Base
         /// <param name="x">X value of the tiles id to find.</param>
         /// <param name="y">Y value of the tiles id to find.</param>
         /// <returns></returns>
-        public static Chunk GetChunkWithPosition(this List<Chunk> chunks, int x, int y)
-        {
-            return chunks.GetChunkWithPosition(new Point(x, y));
-        }
+        public static Chunk GetChunkWithPosition(this List<Chunk> chunks, int x, int y) => chunks.GetChunkWithPosition(new Point(x, y));
 
-        //public static Tile GetTileFromID(this List<Chunk> chunks, Point id)
-        //{
-        //    var x = (int)id.X;
-        //    var y = (int)id.Y;
+        public static Block GetBlockFromID(this List<Chunk> chunks, Point id) => chunks.Find(c => c.Contains(id))?.Blocks.ToList().Find(b => b.Location == id);
 
-        //    foreach (var chunk in chunks)
-        //    {
-        //        var tiles = chunk.Tiles;
-        //        if (tiles == null || tiles.Get(0, 0) == null)
-        //            continue;
-
-        //        var chunkX = (int)chunk.ID.X * 16;
-        //        var chunkY = (int)chunk.ID.Y * 16;
-
-        //        if (x >= chunkX && x < chunkX + 16 && y >= chunkY && y < chunkY + 16)
-        //        {
-        //            var tileX = (int)id.X - chunkX;
-        //            var tileY = (int)id.Y - chunkY;
-
-        //            return tiles.Get(tileX, tileY);
-        //        }
-        //    }
-
-        //    return null;
-        //}
-
-        public static Block GetBlockFromID(this List<Chunk> chunks, Point id)
-        {
-            var x = (int)id.X;
-            var y = (int)id.Y;
-
-            foreach (var chunk in chunks)
-            {
-                if (!chunk.Contains(id)) continue;
-
-                foreach (var block in chunk.Blocks)
-                {
-                    if (block.Location == id) return block;
-                }
-            }
-
-            return null;
-        }
-
-        //public static Tile GetTileFromID(this List<Chunk> chunks, int x, int y)
-        //{
-        //    return chunks.GetTileFromID(new Point(x, y));
-        //}
-
-        public static Block GetBlockFromID(this List<Chunk> chunks, int x, int y)
-        {
-            return chunks.GetBlockFromID(new Point(x, y));
-        }
+        public static Block GetBlockFromID(this List<Chunk> chunks, int x, int y) => chunks.GetBlockFromID(new Point(x, y));
 
         public static bool AddEntityToWorld(this List<Chunk> chunks, GenericEntity entity)
         {
@@ -152,7 +83,9 @@ namespace dEvine_and_conquer.Base
             return list;
         }
 
-        public static T Min<T>(this List<T> list, Func<T, float> prop) => list.Aggregate((i1,i2) => prop(i1) < prop(i2) ? i1 : i2);
+        public static Chunk Contains(this List<Chunk> chunks, Point loc) => chunks.Find(x => x.Contains(loc));
+
+        public static T Min<T>(this List<T> list, Func<T, float> prop) => list.Aggregate((i1, i2) => prop(i1) < prop(i2) ? i1 : i2);
         public static T Max<T>(this List<T> list, Func<T, float> prop) => list.Aggregate((i1, i2) => prop(i1) > prop(i2) ? i1 : i2);
 
         public static float MinValue<T>(this List<T> list, Func<T, float> prop) => prop(list.Aggregate((i1, i2) => prop(i1) < prop(i2) ? i1 : i2));
@@ -164,20 +97,5 @@ namespace dEvine_and_conquer.Base
         public static T Get<T>(this T[] tiles, int x, int y) where T : VisualObject => tiles.Get(new Point(x, y));
 
         public static T Get<T>(this T[] tiles, Point loc) where T : VisualObject => tiles.Where(x => x.Location == loc).First();
-
-        //public static T GetWorldPoint<T>(this XYContainer<T> cont, int x, int y) where T : VisualObject => cont.GetWorldPoint(new Point(x, y));
-
-        //public static T GetWorldPoint<T>(this XYContainer<T> cont, Point loc) where T : VisualObject
-        //{
-        //    for (int y = 0; y < cont.Count(false); y++)
-        //    {
-        //        for (int x = 0; x < cont.Count(true); x++)
-        //        {
-        //            var obj = cont.Get(x, y);
-        //            if (obj.Location == loc) return obj;
-        //        }
-        //    }
-        //    return null;
-        //}
     }
 }
