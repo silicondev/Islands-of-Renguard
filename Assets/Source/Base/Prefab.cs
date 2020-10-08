@@ -120,8 +120,8 @@ namespace dEvine_and_conquer.Base
                 {
                     public static class FRIENDLY
                     {
-                        public static readonly Prefab MALE = new Prefab(2000, "entity:human.friendly.male", "Human Male");
-                        public static readonly Prefab FEMALE = new Prefab(2001, "entity:human.friendly.female", "Human Female");
+                        public static readonly Prefab MALE = new Prefab(2000, "entity:human.friendly.male", "Human Male", "Gender", 0);
+                        public static readonly Prefab FEMALE = new Prefab(2001, "entity:human.friendly.female", "Human Female", "Gender", 1);
                     }
                 }
             }
