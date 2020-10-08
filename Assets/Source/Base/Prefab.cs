@@ -91,13 +91,17 @@ namespace dEvine_and_conquer.Base
             {
                 public static readonly Prefab TREE = new Prefab(101, "overlay:tree", "Tree", "IsCollidable", true);
                 public static readonly Prefab CHEST = new Prefab(102, "overlay:chest", "Chest", "IsCollidable", true);
+                
+            }
+            public static class VARIANT
+            {
                 public static class ORE
                 {
-                    public static readonly ID VOID = 200;
-                    public static readonly ID IRON = 201;
-                    public static readonly ID SILVER = 202;
-                    public static readonly ID GOLD = 203;
-                    public static readonly ID DIAMOND = 204;
+                    public static readonly Variation VOID = new Variation(200);
+                    public static readonly Variation IRON = new Variation(201);
+                    public static readonly Variation SILVER = new Variation(202);
+                    public static readonly Variation GOLD = new Variation(203);
+                    public static readonly Variation DIAMOND = new Variation(204);
                 }
             }
         }
