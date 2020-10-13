@@ -95,9 +95,9 @@ namespace dEvine_and_conquer.Base
 
         public static T Get<T>(this List<T> tiles, int x, int y) where T : VisualObject => tiles.Get(new Point(x, y));
 
-        public static T Get<T>(this List<T> tiles, Point loc) where T : VisualObject => tiles.Where(x => x.Location.Flatten() == loc).First();
+        public static T Get<T>(this List<T> tiles, Point loc) where T : VisualObject => tiles.Where(x => x.GetLocation().Flatten() == loc).First();
         public static T Get<T>(this T[] tiles, int x, int y) where T : VisualObject => tiles.Get(new Point(x, y));
 
-        public static T Get<T>(this T[] tiles, Point loc) where T : VisualObject => tiles.Where(x => x.Location.Flatten() == loc).First();
+        public static T Get<T>(this T[] tiles, Point loc) where T : VisualObject => tiles.Where(x => x.GetLocation().Flatten() == loc).First();
     }
 }

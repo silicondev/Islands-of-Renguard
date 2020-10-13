@@ -32,7 +32,7 @@ namespace dEvine_and_conquer.Scripts
 
         private void Update()
         {
-            Move(Entity.Location);
+            //Move(Entity.Location);
         }
     }
 }

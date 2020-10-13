@@ -15,7 +15,7 @@ namespace dEvine_and_conquer.AI.Pathfinding.AStar
         private AStarTile _closest;
         private List<AStarTile> _openSet = new List<AStarTile>();
         private List<AStarTile> _closedSet = new List<AStarTile>();
-        private List<AStarTile> _path = new List<AStarTile>();
+        private List<Point> _path = new List<Point>();
         private AStarTile _start;
         private AStarTile _end;
         private float _maxScopeVal = 100;
@@ -58,12 +58,14 @@ namespace dEvine_and_conquer.AI.Pathfinding.AStar
             _blocks = blocks;
             _gridHold = null;
         }
-        public List<Block> GetPath(Point start, Point end)
+        public List<Point> GetPath(Point start, Point end)
         {
+            _path.Clear();
+
             if (_grid == null) ReloadGrid();
 
             if (_blocks == null)
-                return null;
+                return _path;
 
             _openSet.Clear();
             _closedSet.Clear();
@@ -101,23 +103,18 @@ namespace dEvine_and_conquer.AI.Pathfinding.AStar
                 _openSet.Remove(_closest);
                 _closedSet.Add(_closest);
 
+                // PATH COMPLETE
                 if (_closest == _end)
                 {
-                    _path.Clear();
                     AStarTile tmp = _closest;
-                    _path.Add(tmp);
+                    _path.Add(tmp.Location);
                     while (tmp.Prev != null)
                     {
-                        _path.Add(tmp.Prev);
+                        _path.Add(tmp.Prev.Location);
                         tmp = tmp.Prev;
                     }
-                    List<Block> output = new List<Block>();
-                    foreach (var i in _path)
-                    {
-                        output.Add(i.Block);
-                    }
-                    output.Reverse();
-                    return output;
+                    _path.Reverse();
+                    break;
                 }
 
                 foreach (var tile in scope)
@@ -158,7 +155,7 @@ namespace dEvine_and_conquer.AI.Pathfinding.AStar
                 }
             }
 
-            return null;
+            return _path;
         }
     }
 }

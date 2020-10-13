@@ -17,10 +17,12 @@ namespace dEvine_and_conquer.AI.Pathfinding.AStar
         public AStarTile Prev { get; set; } = null;
         public Block Block { get; }
         public bool IsWall => Block.IsCollidable;
+        public Point Location { get; set; }
 
-        public AStarTile(Block block) : base(block.Location)
+        public AStarTile(Block block)// : base(block.Location)
         {
             Block = block;
+            Location = block.Location;
         }
 
         public void RefreshLocal(List<AStarTile> grid)
@@ -70,6 +72,11 @@ namespace dEvine_and_conquer.AI.Pathfinding.AStar
             if (!wnw && !wn && !ww) Local.Add(tnw);
             if (!wse && !ws && !we) Local.Add(tse);
             if (!wsw && !ws && !ww) Local.Add(tsw);
+        }
+
+        public Point GetLocation()
+        {
+            return Location;
         }
     }
 }
