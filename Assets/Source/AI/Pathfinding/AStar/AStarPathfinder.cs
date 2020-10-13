@@ -73,13 +73,13 @@ namespace dEvine_and_conquer.AI.Pathfinding.AStar
 
             List<AStarTile> scope = new List<AStarTile>();
 
-            var seh = _heuristic(_start, _end);
+            var seh = PlaneFunctions.Heuristic(_start.Location, _end.Location);
             var seScope = Mathf.Clamp(seh / _scopeDiv, 0, _maxScopeVal);
 
             foreach (var tile in _grid)
             {
-                var s = _heuristic(tile, _start);
-                var e = _heuristic(tile, _end);
+                var s = PlaneFunctions.Heuristic(tile.Location, _start.Location);
+                var e = PlaneFunctions.Heuristic(tile.Location, _end.Location);
                 var h = s + e;
                 if (h <= seh + seScope) scope.Add(tile);
             }
@@ -132,7 +132,7 @@ namespace dEvine_and_conquer.AI.Pathfinding.AStar
                     if (_closedSet.Contains(local))
                         continue;
 
-                    float g = _closest.g + _heuristic(local, _closest);
+                    float g = _closest.g + PlaneFunctions.Heuristic(local.Location, _closest.Location);
 
                     bool newPath = false;
                     if (_openSet.Contains(local))
@@ -151,7 +151,7 @@ namespace dEvine_and_conquer.AI.Pathfinding.AStar
 
                     if (newPath)
                     {
-                        local.h = _heuristic(local, _end);
+                        local.h = PlaneFunctions.Heuristic(local.Location, _end.Location);
                         local.f = local.g + local.h;
                         local.Prev = _closest;
                     }
@@ -160,20 +160,5 @@ namespace dEvine_and_conquer.AI.Pathfinding.AStar
 
             return null;
         }
-
-        private float _heuristic(AStarTile a, AStarTile b)
-        {
-            int ax = a.Location.X.Floor();
-            int ay = a.Location.Y.Floor();
-            int bx = b.Location.X.Floor();
-            int by = b.Location.Y.Floor();
-
-            double x = Math.Pow(_difference(ax, bx), 2);
-            double y = Math.Pow(_difference(ay, by), 2);
-            double z = Math.Sqrt(x + y);
-            return (float)z;
-        }
-
-        private int _difference(int a, int b) => a > b ? a - b : b > a ? b - a : 0;
     }
 }

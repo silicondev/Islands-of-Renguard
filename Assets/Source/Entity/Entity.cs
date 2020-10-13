@@ -13,12 +13,12 @@ using UnityEngine;
 
 namespace dEvine_and_conquer.Entity
 {
-    public abstract class GenericEntity : IUpdateable
+    public abstract class GenericEntity : VisualObject, IUpdateable
     {
         public Inventory Inventory { get; }
         public List<Sprite> Textures { get; protected set; }
-        public Point Location { get; set; }
         public Prefab Type { get; set; }
+        public GameObject Object { get; set; }
         public EntityManager Instance { get; set; }
         protected IPathfinder Pathfinder = new AStarPathfinder();
         private int _animRefresh = 150;
@@ -28,32 +28,30 @@ namespace dEvine_and_conquer.Entity
         protected int pathProgress = 0;
         private float _moveSpeed = 5.0F;
 
-        public GenericEntity(Point loc, Prefab type, int invSlots, List<Sprite> textures = null)
+        public GenericEntity(Point loc, Prefab type, int invSlots, List<Sprite> textures = null) : base(loc)
         {
             Inventory = new Inventory(invSlots);
             if (textures == null)
                 Textures = new List<Sprite>();
             else
                 Textures = textures;
-            Location = loc;
             Type = type;
         }
 
-        public GenericEntity(float x, float y, Prefab type, int invSlots, List<Sprite> textures = null)
+        public GenericEntity(float x, float y, Prefab type, int invSlots, List<Sprite> textures = null) : base(x, y)
         {
             Inventory = new Inventory(invSlots);
             if (textures == null)
                 Textures = new List<Sprite>();
             else
                 Textures = textures;
-            Location = new Point(x, y);
             Type = type;
         }
 
         int animTimer = 0;
-        public void Update(GameSystem system)
+        public void Update()
         {
-            UpdateSpecific(system);
+            UpdateSpecific();
             if (animTimer >= _animRefresh)
             {
                 animTimer = 0;
@@ -74,7 +72,7 @@ namespace dEvine_and_conquer.Entity
             }
         }
 
-        protected abstract void UpdateSpecific(GameSystem system);
+        protected abstract void UpdateSpecific();
 
         int currentFrame = 0;
         private void UpdateAnimation()
@@ -84,11 +82,11 @@ namespace dEvine_and_conquer.Entity
             if (currentFrame >= Textures.Count) currentFrame = 0;
         }
 
-        public void GoTo(Point destination, GameSystem system)
+        public void GoTo(Point destination)
         {
             if (destination == Location) return;
 
-            var chunks = system.LoadedChunks;
+            var chunks = GameSystem.LoadedChunks;
 
             List<Block> blocks = new List<Block>();
             foreach (var chunk in chunks)

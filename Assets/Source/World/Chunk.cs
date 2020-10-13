@@ -31,7 +31,7 @@ namespace dEvine_and_conquer.World
         private Generator _generator;
         public Block[] Blocks;
         public List<GameObject> Objects { get; set; } = new List<GameObject>();
-        public List<GenericEntity> Entities { get; } = new List<GenericEntity>();
+        //public List<GenericEntity> Entities { get; } = new List<GenericEntity>();
         public GameObject Object { get; set; }
         public bool IsGenerated { get; private set; } = false;
 
@@ -61,30 +61,30 @@ namespace dEvine_and_conquer.World
 
         public bool Contains(Point loc)
         {
-            return Contains(loc.X.Floor(), loc.Y.Floor());
+            return Contains(loc.X, loc.Y);
         }
 
-        public bool Contains(int x, int y) =>
-            x >= xPos && x < xPos + _generator.ChunkSize &&
-            y >= yPos && y < yPos + _generator.ChunkSize;
+        public bool Contains(float x, float y) =>
+            x.Floor() >= xPos && x.Floor() < xPos + _generator.ChunkSize &&
+            y.Floor() >= yPos && y.Floor() < yPos + _generator.ChunkSize;
 
-        public void Update(GameSystem system)
+        public void Update()
         {
-            List<GenericEntity> toRemove = new List<GenericEntity>();
-            foreach (var entity in Entities)
-            {
-                entity.Update(system);
-                if (!Contains(entity.Location))
-                {
-                    _system.GeneratedChunks.AddEntityToWorld(entity);
-                    toRemove.Add(entity);
-                }
-            }
+            //List<GenericEntity> toRemove = new List<GenericEntity>();
+            //foreach (var entity in Entities)
+            //{
+            //    entity.Update(system);
+            //    if (!Contains(entity.Location))
+            //    {
+            //        _system.GeneratedChunks.AddEntityToWorld(entity);
+            //        toRemove.Add(entity);
+            //    }
+            //}
 
-            foreach (var entity in toRemove)
-            {
-                Entities.Remove(entity);
-            }
+            //foreach (var entity in toRemove)
+            //{
+            //    Entities.Remove(entity);
+            //}
         }
     }
 }

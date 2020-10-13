@@ -10,8 +10,8 @@ namespace dEvine_and_conquer.Scripts
     {
         private float _defaultZoom = 7F;
         private float _defaultMoveSpeed = 0.2F;
-        private int _viewDisModX = 18;
-        private int _viewDisModY = 18;
+        private int _viewDisModX = 1;
+        private int _viewDisModY = 1;
         private int _viewBuffer = 5;
 
         public bool CanMove { get; set; } = true;

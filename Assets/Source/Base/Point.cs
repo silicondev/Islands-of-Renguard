@@ -53,5 +53,18 @@ namespace dEvine_and_conquer.Base
             X += x;
             Y += y;
         }
+
+        public Point Flatten() => new Point(X.Floor(), Y.Floor());
+
+        public bool IsContainedInCross(Point tl, Point tr, Point bl, Point br)
+        {
+            var topArea = PlaneFunctions.TriangleArea(this, tl, tr);
+            var leftArea = PlaneFunctions.TriangleArea(this, tl, bl);
+            var rightArea = PlaneFunctions.TriangleArea(this, tr, br);
+            var botArea = PlaneFunctions.TriangleArea(this, bl, br);
+            var fullArea = topArea + leftArea + rightArea + botArea;
+            var realArea = PlaneFunctions.QuadrilateralArea(tl, tr, bl, br);
+            return fullArea == realArea;
+        }
     }
 }

@@ -47,30 +47,13 @@ namespace dEvine_and_conquer.Base
             Data.Add(dataId2, data2);
             Data.Add(dataId3, data3);
         }
+        public string GetString(string id) => Data.ContainsKey(id) && Data[id] is string value ? value : "ERR";
 
-        public string GetString(string id)
-        {
-            if (Data.ContainsKey(id) && Data[id] is string value) return value;
-            return "ERR";
-        }
+        public bool GetBool(string id) => Data.ContainsKey(id) && Data[id] is bool value ? value : false;
 
-        public bool GetBool(string id)
-        {
-            if (Data.ContainsKey(id) && Data[id] is bool value) return value;
-            return false;
-        }
+        public float GetFloat(string id) => Data.ContainsKey(id) && Data[id] is float value ? value : -1;
 
-        public float GetFloat(string id)
-        {
-            if (Data.ContainsKey(id) && Data[id] is float value) return value;
-            return -1;
-        }
-
-        public int GetInt(string id)
-        {
-            if (Data.ContainsKey(id) && Data[id] is int value) return value;
-            return -1;
-        }
+        public int GetInt(string id) => Data.ContainsKey(id) && Data[id] is int value ? value : -1;
     }
 
     public static class ObjectID

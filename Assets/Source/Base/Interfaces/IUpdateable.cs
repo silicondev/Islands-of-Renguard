@@ -9,6 +9,6 @@ namespace dEvine_and_conquer.Base.Interfaces
 {
     public interface IUpdateable
     {
-        void Update(GameSystem system);
+        void Update();
     }
 }

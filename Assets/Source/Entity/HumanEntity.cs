@@ -27,7 +27,7 @@ namespace dEvine_and_conquer.Entity
             Gender = gender;
         }
 
-        protected override void UpdateSpecific(GameSystem system)
+        protected override void UpdateSpecific()
         {
             //var chunk = system.LoadedChunks.GetChunkWithPosition(Location);
             //Pathfinder.UpdateWorld(chunk.Tiles);
