@@ -50,6 +50,7 @@ namespace dEvine_and_conquer.Scripts
 
             RunKey(KeyCode.G);
             RunKey(KeyCode.H);
+            RunKey(KeyCode.Q);
             RunKey(KeyCode.Escape);
 
             var scrollDelta = Input.GetAxis("Mouse ScrollWheel");

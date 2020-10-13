@@ -29,9 +29,8 @@ namespace dEvine_and_conquer.World
         }
 
         private Generator _generator;
-        public Block[] Blocks;
+        public Block[] Blocks { get; private set; }
         public List<GameObject> Objects { get; set; } = new List<GameObject>();
-        //public List<GenericEntity> Entities { get; } = new List<GenericEntity>();
         public GameObject Object { get; set; }
         public bool IsGenerated { get; private set; } = false;
 

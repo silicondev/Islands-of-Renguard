@@ -156,10 +156,13 @@ namespace dEvine_and_conquer.Scripts
             {
                 var entity = LoadedEntities[Random.Range(0, LoadedEntities.Count - 1)];
                 entity.GoTo(SelectedTile);
+            } else if (args.KeyPressed == KeyCode.Q)
+            {
+                ForceRegen(true);
             } else if (args.KeyPressed == KeyCode.Escape)
             {
                 TileSelected = false;
-                ForceRegen();
+                ForceRegen(false);
             }
         }
 
