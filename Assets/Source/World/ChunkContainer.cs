@@ -51,15 +51,32 @@ namespace dEvine_and_conquer.World
                 item.Objects.Add(selector);
             }
 
-            foreach (var block in item.Blocks)
-            {
-                GameObject obj = VisualContainer.CreateObject(block.Tile.Type.IdName, block.Location, 0, item.Object.transform);
-                item.Objects.Add(obj);
+            //foreach (var block in item.Blocks)
+            //{
+            //    GameObject obj = VisualContainer.CreateObject(block.Tile.Type.IdName, block.Location, 0, item.Object.transform);
+            //    item.Objects.Add(obj);
 
-                if (block.Overlay.Type != ObjectID.ENV.VOID)
+            //    if (block.Overlay.Type != ObjectID.ENV.VOID)
+            //    {
+            //        GameObject overlayObj = VisualContainer.CreateObject(block.Overlay.Type.IdName, block.Location, 0.1f, item.Object.transform);
+            //        item.Objects.Add(overlayObj);
+            //    }
+            //}
+
+            for (var y = item.yPos; y < item.yPos + item.Size; y++)
+            {
+                for (var x = item.xPos; x < item.xPos + item.Size; x++)
                 {
-                    GameObject overlayObj = VisualContainer.CreateObject(block.Overlay.Type.IdName, block.Location, 0.1f, item.Object.transform);
-                    item.Objects.Add(overlayObj);
+                    var block = item.Blocks.Get(x, y);
+
+                    GameObject obj = VisualContainer.CreateObject(block.Tile.Type.IdName, block.Location, 0, item.Object.transform);
+                    item.Objects.Add(obj);
+
+                    if (block.Overlay.Type != ObjectID.ENV.VOID)
+                    {
+                        GameObject overlayObj = VisualContainer.CreateObject(block.Overlay.Type.IdName, block.Location, 0.1f, item.Object.transform);
+                        item.Objects.Add(overlayObj);
+                    }
                 }
             }
 

@@ -27,9 +27,9 @@ namespace dEvine_and_conquer.Entity
         protected int pathProgress = 0;
         private float _moveSpeed = 5.0F;
 
-        public Point Location { get; set; }
+        //public Point Location { get; set; }
 
-        public GenericEntity(Point loc, Prefab type, int invSlots, List<Sprite> textures = null)// : base(loc)
+        public GenericEntity(Point loc, Prefab type, int invSlots, List<Sprite> textures = null) : base(loc)
         {
             Inventory = new Inventory(invSlots);
             if (textures == null)
@@ -38,10 +38,10 @@ namespace dEvine_and_conquer.Entity
                 Textures = textures;
             Type = type;
 
-            Location = loc;
+            //Location = loc;
         }
 
-        public GenericEntity(float x, float y, Prefab type, int invSlots, List<Sprite> textures = null)// : base(x, y)
+        public GenericEntity(float x, float y, Prefab type, int invSlots, List<Sprite> textures = null) : base(x, y)
         {
             Inventory = new Inventory(invSlots);
             if (textures == null)
@@ -50,7 +50,7 @@ namespace dEvine_and_conquer.Entity
                 Textures = textures;
             Type = type;
 
-            Location = new Point(x, y);
+            //Location = new Point(x, y);
         }
 
         int animTimer = 0;
@@ -109,9 +109,9 @@ namespace dEvine_and_conquer.Entity
             }
         }
 
-        public Point GetLocation()
-        {
-            return Location;
-        }
+        //public Point GetLocation()
+        //{
+        //    return Location;
+        //}
     }
 }

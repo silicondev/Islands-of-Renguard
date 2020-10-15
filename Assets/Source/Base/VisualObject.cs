@@ -7,20 +7,20 @@ using System.Threading.Tasks;
 
 namespace dEvine_and_conquer.Base
 {
-    public interface VisualObject
+    public class VisualObject
     {
-        //public Point Location { get; set; }
-        
-        Point GetLocation();
+        public Point Location { get; set; }
 
-        //public VisualObject(float x, float y)
-        //{
-        //    Location = new Point(x, y);
-        //}
+        //Point GetLocation();
 
-        //public VisualObject(Point loc)
-        //{
-        //    Location = loc;
-        //}
+        public VisualObject(float x, float y)
+        {
+            Location = new Point(x, y);
+        }
+
+        public VisualObject(Point loc)
+        {
+            Location = loc;
+        }
     }
 }

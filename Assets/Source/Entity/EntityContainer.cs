@@ -37,6 +37,7 @@ namespace dEvine_and_conquer.Entity
             GameObject entityObj = VisualContainer.CreateObject(item.Type.IdName, item.Location, 0.2f, parent);
 
             item.Instance = entityObj.AddComponent<EntityManager>();
+            //item.Instance.Renderer = entityObj.AddComponent<SpriteRenderer>();
             item.Object = entityObj;
             item.Instance.Entity = item;
         }

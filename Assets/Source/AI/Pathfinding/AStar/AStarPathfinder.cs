@@ -70,8 +70,8 @@ namespace dEvine_and_conquer.AI.Pathfinding.AStar
             _openSet.Clear();
             _closedSet.Clear();
 
-            _start = _grid.Where(x => x.Location == start).First();
-            _end = _grid.Where(x => x.Location == end).First();
+            _start = _grid.Get(start);
+            _end = _grid.Get(end);
 
             List<AStarTile> scope = new List<AStarTile>();
 

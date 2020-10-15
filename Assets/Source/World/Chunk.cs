@@ -28,6 +28,15 @@ namespace dEvine_and_conquer.World
             }
         }
 
+        public int Size
+        {
+            get
+            {
+                if (_generator != null) return _generator.ChunkSize;
+                return 0;
+            }
+        }
+
         private Generator _generator;
         public Block[] Blocks { get; private set; }
         public List<GameObject> Objects { get; set; } = new List<GameObject>();

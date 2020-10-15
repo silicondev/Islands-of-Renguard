@@ -90,8 +90,6 @@ namespace dEvine_and_conquer.Scripts
             else
                 Debug.LogError("Could not find Player Object");
 
-            //var hud = playerObj.GetComponentsInChildren()
-
             StartupGenerate();
 
             InputEvents input = GetComponent<InputEvents>();
@@ -105,8 +103,9 @@ namespace dEvine_and_conquer.Scripts
         void Update()
         {
             Chunks.GetLoaded().UpdateAll();
+            //RegenEntities();
             Entities.GetLoaded().UpdateAll();
-            ForceRegen(false);
+            //ForceRegen(false);
         }
 
         /// <summary>
@@ -214,11 +213,6 @@ namespace dEvine_and_conquer.Scripts
             RegenEntities();
             StartBlock = CurrentBlock;
         }
-
-        //public void CreateEntity(GenericEntity entity)
-        //{
-        //    LoadedChunks.GetChunkWithPosition(entity.Location)?.Entities.Add(entity);
-        //}
 
         private void ForceRegen(bool incEntities = true)
         {
