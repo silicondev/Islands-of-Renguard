@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Assets.Source.Base;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.Globalization;
@@ -8,10 +9,10 @@ using System.Threading.Tasks;
 
 namespace dEvine_and_conquer.Base
 {
-    public class Prefab
+    public class Prefab : DataContainer
     {
         public ID ID { get; private set; }
-        public Dictionary<string, object> Data { get; private set; } = new Dictionary<string, object>();
+        
         public string IdName { get; private set; }
         public string Name { get; private set; }
 
@@ -47,13 +48,6 @@ namespace dEvine_and_conquer.Base
             Data.Add(dataId2, data2);
             Data.Add(dataId3, data3);
         }
-        public string GetString(string id) => Data.ContainsKey(id) && Data[id] is string value ? value : "ERR";
-
-        public bool GetBool(string id) => Data.ContainsKey(id) && Data[id] is bool value ? value : false;
-
-        public float GetFloat(string id) => Data.ContainsKey(id) && Data[id] is float value ? value : -1;
-
-        public int GetInt(string id) => Data.ContainsKey(id) && Data[id] is int value ? value : -1;
     }
 
     public static class ObjectID

@@ -30,13 +30,13 @@ namespace dEvine_and_conquer.World
 
         public int GeneratedCount() => GeneratedChunks.Count();
 
-        public List<Chunk> GetGenerated() => GeneratedChunks;
+        public List<Chunk> GetGenerated() => new List<Chunk>(GeneratedChunks);
 
-        public List<Chunk> GetLoaded() => LoadedChunks;
+        public List<Chunk> GetLoaded() => new List<Chunk>(LoadedChunks);
 
         public void Load(Chunk item, Transform parent)
         {
-            if (!GeneratedChunks.Contains(item) || LoadedChunks.Contains(item))
+            if (!GeneratedChunks.ContainsID(item.ID) || LoadedChunks.Contains(item))
                 return;
 
             LoadedChunks.Add(item);
@@ -51,32 +51,20 @@ namespace dEvine_and_conquer.World
                 item.Objects.Add(selector);
             }
 
-            //foreach (var block in item.Blocks)
-            //{
-            //    GameObject obj = VisualContainer.CreateObject(block.Tile.Type.IdName, block.Location, 0, item.Object.transform);
-            //    item.Objects.Add(obj);
-
-            //    if (block.Overlay.Type != ObjectID.ENV.VOID)
-            //    {
-            //        GameObject overlayObj = VisualContainer.CreateObject(block.Overlay.Type.IdName, block.Location, 0.1f, item.Object.transform);
-            //        item.Objects.Add(overlayObj);
-            //    }
-            //}
-
-            for (var y = item.yPos; y < item.yPos + item.Size; y++)
+            foreach (var block in item.Blocks)
             {
-                for (var x = item.xPos; x < item.xPos + item.Size; x++)
+                if (!item.Contains(block.Location))
                 {
-                    var block = item.Blocks.Get(x, y);
+                    Debug.Log(string.Format("Attempting to load Block {0},{1} into Chunk {2} has failed.", block.Location.X.ToString(), block.Location.Y.ToString(), item.IDStr));
+                }
 
-                    GameObject obj = VisualContainer.CreateObject(block.Tile.Type.IdName, block.Location, 0, item.Object.transform);
-                    item.Objects.Add(obj);
+                GameObject obj = VisualContainer.CreateObject(block.Tile.Type.IdName, block.Location, 0, item.Object.transform);
+                item.Objects.Add(obj);
 
-                    if (block.Overlay.Type != ObjectID.ENV.VOID)
-                    {
-                        GameObject overlayObj = VisualContainer.CreateObject(block.Overlay.Type.IdName, block.Location, 0.1f, item.Object.transform);
-                        item.Objects.Add(overlayObj);
-                    }
+                if (block.Overlay.Type != ObjectID.ENV.VOID)
+                {
+                    GameObject overlayObj = VisualContainer.CreateObject(block.Overlay.Type.IdName, block.Location, 0.1f, item.Object.transform);
+                    item.Objects.Add(overlayObj);
                 }
             }
 

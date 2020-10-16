@@ -29,9 +29,7 @@ namespace dEvine_and_conquer.Entity
 
         protected override void UpdateSpecific()
         {
-            //var chunk = system.LoadedChunks.GetChunkWithPosition(Location);
-            //Pathfinder.UpdateWorld(chunk.Tiles);
-            //var path = Pathfinder.GetPath(Location, )
+
         }
     }
 }

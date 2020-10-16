@@ -43,22 +43,36 @@ namespace dEvine_and_conquer.World
         public GameObject Object { get; set; }
         public bool IsGenerated { get; private set; } = false;
 
-        public Chunk(int x, int y, Generator gen, GameSystem system = null)
+        public Chunk(int x, int y, Generator gen)
         {
-            Setup(x, y, gen, system);
+            Setup(x, y, gen);
         }
 
-        public Chunk(Point id, Generator gen, GameSystem system = null)
+        public Chunk(Point id, Generator gen)
         {
-            Setup((int)id.X * gen.ChunkSize, (int)id.Y * gen.ChunkSize, gen, system);
+            Setup((int)id.X * gen.ChunkSize, (int)id.Y * gen.ChunkSize, gen);
         }
 
-        private void Setup(int x, int y, Generator gen, GameSystem system)
+        public Chunk(int x, int y, Generator gen, Block[] blocks)
+        {
+            Setup(x, y, gen, blocks);
+        }
+
+        public Chunk(Point id, Generator gen, Block[] blocks)
+        {
+            Setup((int)id.X * gen.ChunkSize, (int)id.Y * gen.ChunkSize, gen, blocks);
+        }
+
+        private void Setup(int x, int y, Generator gen, Block[] blocks = null)
         {
             _generator = gen;
-            if (system != null) _system = system;
             xPos = x;
             yPos = y;
+            if (blocks != null)
+            {
+                IsGenerated = true;
+                Blocks = blocks;
+            }
         }
 
         public void Generate()
@@ -78,21 +92,7 @@ namespace dEvine_and_conquer.World
 
         public void Update()
         {
-            //List<GenericEntity> toRemove = new List<GenericEntity>();
-            //foreach (var entity in Entities)
-            //{
-            //    entity.Update(system);
-            //    if (!Contains(entity.Location))
-            //    {
-            //        _system.GeneratedChunks.AddEntityToWorld(entity);
-            //        toRemove.Add(entity);
-            //    }
-            //}
 
-            //foreach (var entity in toRemove)
-            //{
-            //    Entities.Remove(entity);
-            //}
         }
     }
 }

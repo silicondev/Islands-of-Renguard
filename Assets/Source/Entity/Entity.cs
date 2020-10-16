@@ -27,8 +27,6 @@ namespace dEvine_and_conquer.Entity
         protected int pathProgress = 0;
         private float _moveSpeed = 5.0F;
 
-        //public Point Location { get; set; }
-
         public GenericEntity(Point loc, Prefab type, int invSlots, List<Sprite> textures = null) : base(loc)
         {
             Inventory = new Inventory(invSlots);
@@ -37,8 +35,6 @@ namespace dEvine_and_conquer.Entity
             else
                 Textures = textures;
             Type = type;
-
-            //Location = loc;
         }
 
         public GenericEntity(float x, float y, Prefab type, int invSlots, List<Sprite> textures = null) : base(x, y)
@@ -49,8 +45,6 @@ namespace dEvine_and_conquer.Entity
             else
                 Textures = textures;
             Type = type;
-
-            //Location = new Point(x, y);
         }
 
         int animTimer = 0;
@@ -69,7 +63,6 @@ namespace dEvine_and_conquer.Entity
                 Location.X = Mathf.MoveTowards(Location.X, newLoc.X, Time.deltaTime * _moveSpeed);
                 Location.Y = Mathf.MoveTowards(Location.Y, newLoc.Y, Time.deltaTime * _moveSpeed);
                 if (Location == newLoc) pathProgress++;
-                Instance.Move(Location);
             }
             if (currentPath != null && pathProgress == currentPath.Count)
             {
@@ -108,10 +101,5 @@ namespace dEvine_and_conquer.Entity
                 Debug.Log(string.Format("{0} Entity is moving from {1},{2} to {3},{4}", Type.Name, Location.X.ToString(), Location.Y.ToString(), destination.X.ToString(), destination.Y.ToString()));
             }
         }
-
-        //public Point GetLocation()
-        //{
-        //    return Location;
-        //}
     }
 }

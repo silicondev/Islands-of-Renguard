@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -9,9 +10,7 @@ namespace dEvine_and_conquer.Base
 {
     public class VisualObject
     {
-        public Point Location { get; set; }
-
-        //Point GetLocation();
+        public Point Location { get; private set; }
 
         public VisualObject(float x, float y)
         {
@@ -20,7 +19,7 @@ namespace dEvine_and_conquer.Base
 
         public VisualObject(Point loc)
         {
-            Location = loc;
+            Location = loc.Copy();
         }
     }
 }

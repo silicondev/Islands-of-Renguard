@@ -28,25 +28,4 @@ namespace dEvine_and_conquer.Base
             transform.position = new Vector3(x, y, z);
         }
     }
-
-    public static class ScriptFunctions
-    {
-        public static void Move<T>(this T component, float x, float y) where T : MonoBehaviour
-        {
-            component.Move(new Point(x, y));
-        }
-
-        public static void Move<T>(this T component, Point loc) where T : MonoBehaviour
-        {
-            var z = component.transform.position.z;
-            component.transform.position = new Vector3(loc.X + 0.5f, loc.Y + 0.5f, z);
-        }
-
-        public static void SetZ<T>(this T component, float z) where T : MonoBehaviour
-        {
-            var x = component.transform.position.x;
-            var y = component.transform.position.y;
-            component.transform.position = new Vector3(x, y, z);
-        }
-    }
 }

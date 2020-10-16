@@ -66,9 +66,9 @@ namespace dEvine_and_conquer.Scripts
             foreach (var obj in Prefabs)
             {
                 obj.Value.transform.position = new Vector3(0, 0, 10);
-                var renderer = obj.Value.GetComponent<SpriteRenderer>();
-                var clr = renderer.color;
-                renderer.color = new Color(clr.r, clr.g, clr.b, 0.2f);
+                //var renderer = obj.Value.GetComponent<SpriteRenderer>();
+                //var clr = renderer.color;
+                //renderer.color = new Color(clr.r, clr.g, clr.b, 0.2f);
                 obj.Value.SetActive(false);
                 obj.Value.name = obj.Key + ";PREFAB";
             }
@@ -103,9 +103,7 @@ namespace dEvine_and_conquer.Scripts
         void Update()
         {
             Chunks.GetLoaded().UpdateAll();
-            //RegenEntities();
             Entities.GetLoaded().UpdateAll();
-            //ForceRegen(false);
         }
 
         /// <summary>
@@ -252,14 +250,25 @@ namespace dEvine_and_conquer.Scripts
 
                     // Find chunk if exists
                     var id = new Point((int)Math.Floor(x / 16d), (int)Math.Floor(y / 16d));
-                    var newChunk = Chunks.GetGenerated().GetChunk(id) ?? new Chunk(id, Generator, this);
-
-                    // Chunk does not already exist, generate a new one.
-                    if (!newChunk.IsGenerated)
+                    //var newChunk = Chunks.GetGenerated().GetChunk(id) ?? new Chunk(id, Generator);
+                    Chunk newChunk;
+                    if (Chunks.GetGenerated().GetChunk(id) != null)
                     {
+                        newChunk = new Chunk(id, Generator, Chunks.GetGenerated().GetChunk(id).Blocks);
+                        Debug.Log(string.Format("Found generated Chunk ID {0} with {1} blocks.", newChunk.IDStr, newChunk.Blocks.Length.ToString()));
+                    } else
+                    {
+                        newChunk = new Chunk(id, Generator);
                         hasNewChunks = true;
                         Chunks.Generate(newChunk);
                     }
+
+                    // Chunk does not already exist, generate a new one.
+                    //if (!newChunk.IsGenerated)
+                    //{
+                    //    hasNewChunks = true;
+                    //    Chunks.Generate(newChunk);
+                    //}
 
                     // Load chunk
                     Chunks.Load(newChunk, transform);

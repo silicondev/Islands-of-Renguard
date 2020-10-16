@@ -27,17 +27,17 @@ namespace dEvine_and_conquer.Base
             if (obj is Point point)
                 other = point;
             else return false;
-            return X == other.X && Y == other.Y;
+            return Equals(other);
         }
 
         public static bool operator ==(Point a, Point b)
         {
-            return a.X == b.X && a.Y == b.Y;
+            return a.Equals(b);
         }
 
         public static bool operator !=(Point a, Point b)
         {
-            return a.X != b.X && a.Y != b.Y;
+            return !a.Equals(b);
         }
 
         public override int GetHashCode()
@@ -66,5 +66,7 @@ namespace dEvine_and_conquer.Base
             var realArea = PlaneFunctions.QuadrilateralArea(tl, tr, bl, br);
             return fullArea == realArea;
         }
+
+        public Point Copy() => new Point(X, Y);
     }
 }
