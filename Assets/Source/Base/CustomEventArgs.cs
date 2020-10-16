@@ -26,4 +26,22 @@ namespace dEvine_and_conquer.Base
             IsUp = isUp;
         }
     }
+
+    public class ClickEventArgs : EventArgs
+    {
+        public Vector3 Position { get; }
+        public int Button { get; }
+
+        public ClickEventArgs(int btn, Vector3 pos)
+        {
+            Button = btn;
+            Position = pos;
+        }
+    }
+
+    public static class MouseButton
+    {
+        public static int LEFT = 0;
+        public static int RIGHT = 1;
+    }
 }

@@ -6,19 +6,19 @@ using UnityEngine;
 
 namespace dEvine_and_conquer.Scripts
 {
-    public class PlayerManager : MonoBehaviour
+    public class PlayerManager : Script
     {
         private float _defaultZoom = 7F;
         private float _defaultMoveSpeed = 0.2F;
-        private int _viewDisModX = 18;
-        private int _viewDisModY = 18;
+        private int _viewDisModX = 1;
+        private int _viewDisModY = 1;
         private int _viewBuffer = 5;
 
         public bool CanMove { get; set; } = true;
         public Point ViewDis { 
             get 
             {
-                var zoomMod = (CurrentZoom / _defaultZoom);
+                var zoomMod = CurrentZoom / _defaultZoom;
                 return new Point((int)(_viewDisModX * zoomMod) + _viewBuffer, (int)(_viewDisModY * zoomMod) + _viewBuffer);
             }
         }
@@ -28,24 +28,33 @@ namespace dEvine_and_conquer.Scripts
         public float MinZoom { get; private set; } = 1.0F;
         public float MaxZoom { get; private set; } = 10.0F;
         public float TargetZoom { get; private set; }
-        public float CurrentZoom => Camera.main.orthographicSize;
-        public Point Location => new Point((int)Math.Floor(transform.position.x), (int)Math.Floor(transform.position.y));
+        public float CurrentZoom
+        {
+            get
+            {
+                return Camera.main.orthographicSize;
+            }
+            set
+            {
+                Camera.main.orthographicSize = value;
+            }
+        }
+        public Point Location { get; set; }
 
-        private void MoveUp() => Move(MoveSpeed, MoveSpeed);
-        private void MoveRight() => Move(MoveSpeed, MoveSpeed / -1);
-        private void MoveLeft() => Move(MoveSpeed / -1, MoveSpeed);
-        private void MoveDown() => Move(MoveSpeed / -1, MoveSpeed / -1);
+        private void MoveUp() => Location.Move(0, MoveSpeed);
+        private void MoveRight() => Location.Move(MoveSpeed, 0);
+        private void MoveLeft() => Location.Move(MoveSpeed / -1, 0);
+        private void MoveDown() => Location.Move(0, MoveSpeed / -1);
 
-        // Start is called before the first frame update
         private void Start()
         {
             TargetZoom = _defaultZoom;
         }
 
-        // Update is called once per frame
         private void Update()
         {
-            Camera.main.orthographicSize = Mathf.MoveTowards(Camera.main.orthographicSize, TargetZoom, SmoothSpeed * Time.deltaTime);
+            if (CurrentZoom != TargetZoom) CurrentZoom = Mathf.MoveTowards(CurrentZoom, TargetZoom, SmoothSpeed * Time.deltaTime);
+            Move(Location);
         }
 
         public void OnMove(object sender, EventArgs args)
@@ -78,7 +87,5 @@ namespace dEvine_and_conquer.Scripts
             TargetZoom -= e.IsUp ? ZoomSpeed : ZoomSpeed / -1;
             TargetZoom = Mathf.Clamp(TargetZoom, MinZoom, MaxZoom);
         }
-
-        private void Move(float x, float y) => transform.position = new Vector3(transform.position.x + x, transform.position.y + y, -1.5F);
     }
 }

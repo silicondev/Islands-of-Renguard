@@ -1,4 +1,5 @@
 ﻿using dEvine_and_conquer.Base;
+using dEvine_and_conquer.Base.Interfaces;
 using dEvine_and_conquer.Entity;
 using dEvine_and_conquer.Scripts;
 using System;
@@ -11,18 +12,12 @@ using UnityEngine;
 
 namespace dEvine_and_conquer.World
 {
-    public class Chunk
+    public class Chunk : IUpdateable
     {
         private GameSystem _system;
         public int xPos { get; private set; }
         public int yPos { get; private set; }
-        public string IDStr
-        {
-            get
-            {
-                return (xPos / _generator.ChunkSize).ToString() + ";" + (yPos / _generator.ChunkSize).ToString();
-            }
-        }
+        public string IDStr => ((int)ID.X).ToString() + ";" + ((int)ID.Y).ToString();
 
         public Point ID
         {
@@ -33,66 +28,71 @@ namespace dEvine_and_conquer.World
             }
         }
 
+        public int Size
+        {
+            get
+            {
+                if (_generator != null) return _generator.ChunkSize;
+                return 0;
+            }
+        }
+
         private Generator _generator;
-        public XYContainer<Tile> Tiles { get; private set; } = new List<List<Tile>>();
-        public XYContainer<Overlay> Overlays { get; private set; } = new List<List<Overlay>>();
+        public Block[] Blocks { get; private set; }
         public List<GameObject> Objects { get; set; } = new List<GameObject>();
-        public List<GenericEntity> Entities { get; } = new List<GenericEntity>();
         public GameObject Object { get; set; }
+        public bool IsGenerated { get; private set; } = false;
 
-        public Chunk(int x, int y, Generator gen, GameSystem system = null)
+        public Chunk(int x, int y, Generator gen)
         {
-            Setup(x, y, gen, system);
+            Setup(x, y, gen);
         }
 
-        public Chunk(Point id, Generator gen, GameSystem system = null)
+        public Chunk(Point id, Generator gen)
         {
-            Setup((int)id.X * gen.ChunkSize, (int)id.Y * gen.ChunkSize, gen, system);
+            Setup((int)id.X * gen.ChunkSize, (int)id.Y * gen.ChunkSize, gen);
         }
 
-        private void Setup(int x, int y, Generator gen, GameSystem system)
+        public Chunk(int x, int y, Generator gen, Block[] blocks)
+        {
+            Setup(x, y, gen, blocks);
+        }
+
+        public Chunk(Point id, Generator gen, Block[] blocks)
+        {
+            Setup((int)id.X * gen.ChunkSize, (int)id.Y * gen.ChunkSize, gen, blocks);
+        }
+
+        private void Setup(int x, int y, Generator gen, Block[] blocks = null)
         {
             _generator = gen;
-            if (system != null) _system = system;
             xPos = x;
             yPos = y;
+            if (blocks != null)
+            {
+                IsGenerated = true;
+                Blocks = blocks;
+            }
         }
 
         public void Generate()
         {
-            var gen = _generator.GenerateChunk(ID);
-            Tiles = gen.Tiles;
-            Overlays = gen.Overlays;
+            Blocks = _generator.GenerateChunk(ID);
+            IsGenerated = true;
         }
 
         public bool Contains(Point loc)
         {
-            return Contains((int)loc.X, (int)loc.Y);
+            return Contains(loc.X, loc.Y);
         }
-        
-        public bool Contains(int x, int y) => 
-            x >= xPos &&
-            x < xPos + _generator.ChunkSize &&
-            y >= yPos &&
-            y < yPos + _generator.ChunkSize;
 
-        public void Refresh()
+        public bool Contains(float x, float y) =>
+            x.Floor() >= xPos && x.Floor() < xPos + _generator.ChunkSize &&
+            y.Floor() >= yPos && y.Floor() < yPos + _generator.ChunkSize;
+
+        public void Update()
         {
-            foreach (var entity in Entities)
-            {
-                if (!Contains(entity.Location))
-                {
-                    foreach (var chunk in _system.GeneratedChunks)
-                    {
-                        if (chunk.ID != ID && chunk.Contains(entity.Location))
-                        {
-                            chunk.Entities.Add(entity);
-                            continue;
-                        }
-                    }
-                    Entities.Remove(entity); //This just despawns the entity if they leave the generated area. This may need fixing.
-                }
-            }
+
         }
     }
 }

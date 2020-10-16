@@ -17,13 +17,13 @@ namespace dEvine_and_conquer.World
         public Prefab ParseHeight(float height)
         {
             if (height > _settings.MountainLevel)
-                return TileID.ENV.STONE;
+                return ObjectID.ENV.TILE.STONE;
             else if (height > _settings.ShallowWaterLevel && height <= _settings.SandLevel)
-                return TileID.ENV.SAND;
+                return ObjectID.ENV.TILE.SAND;
             else if (height < _settings.ShallowWaterLevel)
-                return TileID.ENV.WATER;
+                return ObjectID.ENV.TILE.WATER;
             else
-                return TileID.ENV.GRASS;
+                return ObjectID.ENV.TILE.GRASS;
         }
     }
 }

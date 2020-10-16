@@ -4,6 +4,8 @@ using dEvine_and_conquer.World;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.InteropServices.ComTypes;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -13,19 +15,23 @@ namespace dEvine_and_conquer.Scripts
     {
         public GameSystem Instance { get; private set; }
 
-        private Dictionary<string, GameObject> _prefabs;
-        private GameObject _prefabObj;
+        public static Dictionary<string, GameObject> Prefabs;
+        private static GameObject _prefabObj;
 
-        private PlayerManager _player;
-        private Generator _generator;
-        private WorldMapperSettings _mapper;
+        public static PlayerManager Player;
+        public static Generator Generator;
+        public static WorldMapperSettings Mapper;
 
-        public List<Chunk> GeneratedChunks = new List<Chunk>();
-        public List<Chunk> LoadedChunks = new List<Chunk>();
-        private Chunk _current;
+        public static ChunkContainer Chunks;
+        public static EntityContainer Entities;
 
-        public Tile CurrentTile => LoadedChunks.GetTileFromID(new Point((int)Math.Floor(_player.Location.X), (int)Math.Floor(_player.Location.Y)));
-        public Tile StartTile = null;
+        public static bool TileSelected { get; set; } = false;
+        public static Point SelectedTile { get; private set; }
+
+        private static Chunk _current;
+
+        public Block CurrentBlock => Chunks.GetLoaded().GetBlockFromID(Player.Location);
+        public static Block StartBlock = null;
         void Awake()
         {
             Instance = this;
@@ -44,7 +50,7 @@ namespace dEvine_and_conquer.Scripts
             _prefabObj.SetActive(false);
             _prefabObj.transform.position = new Vector3(0, 0, 10);
 
-            _prefabs = new Dictionary<string, GameObject>() {
+            Prefabs = new Dictionary<string, GameObject>() {
                 { "tile:grass", (GameObject)Instantiate(Resources.Load("Prefabs/Tile/Tile_Env_Grass"), _prefabObj.transform) },
                 { "tile:stone", (GameObject)Instantiate(Resources.Load("Prefabs/Tile/Tile_Env_Stone"), _prefabObj.transform) },
                 { "tile:water", (GameObject)Instantiate(Resources.Load("Prefabs/Tile/Tile_Env_Water"), _prefabObj.transform) },
@@ -52,24 +58,35 @@ namespace dEvine_and_conquer.Scripts
 
                 { "overlay:tree", (GameObject)Instantiate(Resources.Load("Prefabs/Overlay/Overlay_Env_Tree"), _prefabObj.transform) },
 
-                { "entity:human", (GameObject)Instantiate(Resources.Load("Prefabs/Entity/Human/Entity_Human_Male"), _prefabObj.transform) },
+                { "entity:human.friendly.male", (GameObject)Instantiate(Resources.Load("Prefabs/Entity/Human/Entity_Human_Male"), _prefabObj.transform) },
+
+                { "ui:selector", (GameObject)Instantiate(Resources.Load("Prefabs/UI/UI_Selector"), _prefabObj.transform) }
             };
 
-            foreach (var obj in _prefabs)
+            foreach (var obj in Prefabs)
             {
                 obj.Value.transform.position = new Vector3(0, 0, 10);
+                //var renderer = obj.Value.GetComponent<SpriteRenderer>();
+                //var clr = renderer.color;
+                //renderer.color = new Color(clr.r, clr.g, clr.b, 0.2f);
                 obj.Value.SetActive(false);
                 obj.Value.name = obj.Key + ";PREFAB";
             }
 
+            Entities = new EntityContainer(transform);
+            Chunks = new ChunkContainer(transform);
+
             var seed = Random.Range(0.0F, 10000000.0F);
-            _mapper = new WorldMapperSettings(80, 100, 105, 200);
-            _generator = new Generator(0.01F, seed, 16, new WorldMapper(_mapper));
+            Mapper = new WorldMapperSettings(80, 100, 105, 200);
+            Generator = new Generator(0.01F, seed, 16, new WorldMapper(Mapper));
             Debug.Log("Seed: " + seed.ToString());
 
             var playerObj = GameObject.FindWithTag("Player");
             if (playerObj != null)
-                _player = playerObj.GetComponent<PlayerManager>();
+            {
+                Player = playerObj.GetComponent<PlayerManager>();
+                Player.Location = new Point(0, 0);
+            }
             else
                 Debug.LogError("Could not find Player Object");
 
@@ -79,12 +96,14 @@ namespace dEvine_and_conquer.Scripts
             input.OnMovementKeyPressed += OnMovement;
             input.OnScroll += OnScroll;
             input.OnKeyPressed += OnKeyPress;
+            input.OnMouseClick += OnClick;
         }
 
         // Update is called once per frame
         void Update()
         {
-
+            Chunks.GetLoaded().UpdateAll();
+            Entities.GetLoaded().UpdateAll();
         }
 
         /// <summary>
@@ -94,13 +113,31 @@ namespace dEvine_and_conquer.Scripts
         /// <param name="e"></param>
         private void OnMovement(object sender, EventArgs e)
         {
-            _player.OnMove(sender, e);
-            RegenChunks();
+            Player.OnMove(sender, e);
+
+            var sev = new Vector3(0, 0, 0);
+            var nev = new Vector3(0, Screen.height, 0);
+            var swv = new Vector3(Screen.width, 0, 0);
+            var nwv = new Vector3(Screen.width, Screen.height, 0);
+
+            var se = GetBlockFromScreen(sev);
+            var ne = GetBlockFromScreen(nev);
+            var sw = GetBlockFromScreen(swv);
+            var nw = GetBlockFromScreen(nwv);
+
+            if (se == null ||
+                ne == null ||
+                sw == null ||
+                nw == null)
+            {
+                RegenChunks();
+                RegenEntities();
+            }
         }
 
         private void OnScroll(object sender, EventArgs e)
         {
-            _player.OnScroll(sender, e);
+            Player.OnScroll(sender, e);
             RegenChunks();
         }
 
@@ -109,38 +146,77 @@ namespace dEvine_and_conquer.Scripts
             KeyEventArgs args = (KeyEventArgs)e;
             if (args.KeyPressed == KeyCode.G)
             {
-                if (!LoadedChunks.AddEntityToWorld(new HumanEntity(_player.Location, 1)))
-                {
-                    Debug.Log("ERROR: Could not add entity to world.");
-                } else
+                if (TileSelected)
                 {
                     Debug.Log("Entity Human Added!");
-                    ForceRegen();
+                    Entities.Generate(new HumanEntity(SelectedTile, 1));
+                    RegenEntities();
+                } else
+                    Debug.Log("ERROR: Could not add entity to world.");
+            }
+            else if (args.KeyPressed == KeyCode.H && TileSelected)
+            {
+                var entity = Entities.GetLoaded()[Random.Range(0, Entities.LoadedCount() - 1)];
+                entity.GoTo(SelectedTile);
+            } else if (args.KeyPressed == KeyCode.Q)
+            {
+                ForceRegen(true);
+            } else if (args.KeyPressed == KeyCode.Escape)
+            {
+                TileSelected = false;
+                ForceRegen(false);
+            }
+        }
+
+        private void OnClick(object sender, EventArgs e)
+        {
+            ClickEventArgs args = (ClickEventArgs)e;
+            if (args.Button == MouseButton.LEFT)
+            {
+                var block = GetBlockFromScreen(args.Position);
+                if (block == null)
+                    Debug.Log("ERROR: Could not find object.");
+                else
+                {
+                    Debug.Log(string.Format("Tile: {0}. Overlay: {1}", block.Tile.Type.Name, block.Overlay.Type.Name));
+
+                    SelectedTile = block.Location;
+                    TileSelected = true;
+                    ForceRegen(false);
                 }
             }
+        }
+
+        private static Block GetBlockFromScreen(Vector3 position)
+        {
+            var flat = ScreenToWorld(position);
+            var chunk = Chunks.GetLoaded().GetContains(flat);
+            if (chunk == null)
+                return null;
+            var x = flat.X.Floor();
+            var y = flat.Y.Floor();
+            var block = chunk.Blocks.Get(x, y);
+            return block;
+        }
+
+        private static Point ScreenToWorld(Vector3 position)
+        {
+            var vPos = Camera.main.ScreenToWorldPoint(position);
+            return new Point(vPos.x, vPos.y);
         }
 
         private void StartupGenerate()
         {
             RegenChunks();
-            StartTile = CurrentTile;
+            RegenEntities();
+            StartBlock = CurrentBlock;
         }
 
-        private void GeneratePath()
+        private void ForceRegen(bool incEntities = true)
         {
-
-        }
-
-        public void CreateEntity(GenericEntity entity)
-        {
-            LoadedChunks.GetChunkWithTile(entity.Location)?.Entities.Add(entity);
-        }
-
-        private void ForceRegen()
-        {
-            List<Chunk> remove = new List<Chunk>(LoadedChunks);
-            RemoveChunks(remove);
+            Chunks.UnloadAll();
             RegenChunks();
+            if (incEntities) RegenEntities();
         }
 
         /// <summary>
@@ -148,151 +224,93 @@ namespace dEvine_and_conquer.Scripts
         /// </summary>
         private void RegenChunks()
         {
-            int posX = (int)_player.Location.X;
-            int posY = (int)_player.Location.Y;
+            int posX = (int)Player.Location.X;
+            int posY = (int)Player.Location.Y;
 
-            foreach (var chunk in LoadedChunks)
-            {
-                if (chunk.Contains(posX, posY))
-                {
-                    _current = chunk;
-                    break;
-                }
-            }
-
-            var topLeftDraw = new Point(posX - _player.ViewDis.X, posY + _player.ViewDis.Y);
-            var bottomRightDraw = new Point(posX + _player.ViewDis.X, posY - _player.ViewDis.Y);
+            var bottomLeft = ScreenToWorld(new Vector3(0, 0, 0));
+            var topRight = ScreenToWorld(new Vector3(Screen.width, Screen.height, 0));
 
             bool hasNewChunks = false;
-
             List<Chunk> foundChunks = new List<Chunk>();
-            for (int y = (int)bottomRightDraw.Y; y < (int)topLeftDraw.Y; y++)
+            for (int y = (bottomLeft.Y - Player.ViewDis.Y).Floor(); y < (topRight.Y + Player.ViewDis.Y).Floor(); y++)
             {
-                for (int x = (int)topLeftDraw.X; x < (int)bottomRightDraw.X; x++)
+                for (int x = (bottomLeft.X.Floor() - Player.ViewDis.X).Floor(); x < (topRight.X.Floor() + Player.ViewDis.X).Floor(); x++)
                 {
                     // If chunk is already loaded, then skip this loop
-                    if (LoadedChunks.GetChunkWithTile(x, y) != null)
+                    if (!foundChunks.Contains(x, y))
                     {
-                        foundChunks.Add(LoadedChunks.GetChunkWithTile(x, y));
+                        var loaded = Chunks.GetLoaded().GetChunkWithPosition(x, y);
+                        if (loaded != null)
+                        {
+                            foundChunks.Add(loaded);
+                            continue;
+                        }
+                    } else
                         continue;
-                    }
 
                     // Find chunk if exists
                     var id = new Point((int)Math.Floor(x / 16d), (int)Math.Floor(y / 16d));
-                    var exists = GeneratedChunks.GetChunk(id) != null;
-                    var newChunk = exists ? GeneratedChunks.GetChunk(id) : new Chunk(id, _generator, this);
-
-                    // Chunk does not already exist, generate a new one.
-                    if (!exists)
+                    //var newChunk = Chunks.GetGenerated().GetChunk(id) ?? new Chunk(id, Generator);
+                    Chunk newChunk;
+                    if (Chunks.GetGenerated().GetChunk(id) != null)
                     {
+                        newChunk = new Chunk(id, Generator, Chunks.GetGenerated().GetChunk(id).Blocks);
+                        Debug.Log(string.Format("Found generated Chunk ID {0} with {1} blocks.", newChunk.IDStr, newChunk.Blocks.Length.ToString()));
+                    } else
+                    {
+                        newChunk = new Chunk(id, Generator);
                         hasNewChunks = true;
-                        newChunk.Generate();
-                        GeneratedChunks.Add(newChunk);
+                        Chunks.Generate(newChunk);
                     }
 
+                    // Chunk does not already exist, generate a new one.
+                    //if (!newChunk.IsGenerated)
+                    //{
+                    //    hasNewChunks = true;
+                    //    Chunks.Generate(newChunk);
+                    //}
+
                     // Load chunk
-                    LoadedChunks.Add(newChunk);
-                    LoadChunk(newChunk);
-                    if (newChunk.Contains(posX, posY)) _current = newChunk;
+                    Chunks.Load(newChunk, transform);
                 }
             }
-            if (hasNewChunks) Debug.Log("Current Generated Chunks: " + GeneratedChunks.Count);
+
+            if (hasNewChunks) 
+                Debug.Log("Current Generated Chunks: " + Chunks.GeneratedCount());
 
             // Unload unneeded chunks
             List<Chunk> removeChunks = new List<Chunk>();
-            foreach (var chunk in LoadedChunks)
+            foreach (var chunk in Chunks.GetLoaded())
             {
                 if (foundChunks.GetChunk(chunk.ID) == null)
                 {
                     removeChunks.Add(chunk);
                 }
             }
-            RemoveChunks(removeChunks);
+            Chunks.UnloadAll(removeChunks);
 
-            foreach (var chunk in LoadedChunks) chunk.Refresh();
+            _current = Chunks.GetLoaded().GetContains(new Point(posX, posY));
+            Chunks.GetLoaded().UpdateAll();
         }
 
-        private void RemoveChunks(List<Chunk> chunks)
+        private void RegenEntities()
         {
-            foreach (var chunk in chunks)
+            Entities.UnloadAll();
+            List<GenericEntity> existingEntities = new List<GenericEntity>(Entities.GetGenerated());
+            List<GenericEntity> toAdd = new List<GenericEntity>();
+            foreach (var chunk in Chunks.GetLoaded())
             {
-                LoadedChunks.Remove(chunk);
-                UnloadChunk(chunk);
-            }
-        }
-
-        /// <summary>
-        /// Loads the chunk into GameObjects.
-        /// </summary>
-        /// <param name="chunk">The chunk to load.</param>
-        private void LoadChunk(Chunk chunk)
-        {
-            var chunkObj = new GameObject("Chunk:" + chunk.IDStr);
-            chunk.Object = Instantiate(chunkObj, transform);
-            chunk.Object.name = chunk.Object.name.Substring(0, chunk.Object.name.Length - 7);
-
-            for (int y = 0; y < chunk.Tiles.Value.Count; y++)
-            {
-                for (int x = 0; x < chunk.Tiles.Value[y].Count; x++)
+                List<GenericEntity> edit = new List<GenericEntity>(existingEntities);
+                foreach (var entity in edit)
                 {
-                    var tile = chunk.Tiles.Value[x][y];
-                    var overlay = chunk.Overlays.Value[x][y];
-
-                    GameObject obj;
-                    GameObject overlayObj = null;
-                    var loadOverlay = false;
-
-                    obj = Instantiate(_prefabs[tile.Type.Name], chunk.Object.transform);
-                    obj.SetActive(true);
-
-                    if (overlay.Type != TileID.ENV_OVERLAY.VOID)
+                    if (chunk.Contains(entity.Location))
                     {
-                        loadOverlay = true;
-                        overlayObj = Instantiate(_prefabs[overlay.Type.Name], chunk.Object.transform);
-                        overlayObj.SetActive(true);
+                        toAdd.Add(entity);
+                        existingEntities.Remove(entity);
                     }
-
-                    obj.name = string.Format("{0};{1},{2}", tile.Type.Name, x.ToString(), y.ToString());
-                    //obj.name = obj.name.Substring(0, obj.name.Length - 14);
-                    if (loadOverlay) overlayObj.name = string.Format("{0};{1},{2}", overlay.Type.Name, x.ToString(), y.ToString()); //overlayObj.name = overlayObj.name.Substring(0, overlayObj.name.Length - 14);
-
-                    obj.transform.position = new Vector3(tile.Location.X + 0.5F, tile.Location.Y + 0.5F, 0);
-
-                    if (loadOverlay)
-                        overlayObj.transform.position = new Vector3(overlay.Location.X + 0.5F, overlay.Location.Y + 0.5F, -0.1F);
-                    else
-                        Destroy(overlayObj);
-
-                    chunk.Objects.Add(obj);
-                    if (loadOverlay) chunk.Objects.Add(overlayObj);
                 }
             }
-
-            foreach (var entity in chunk.Entities)
-            {
-                Debug.Log(string.Format("Entity Generated at {0},{1}", entity.Location.X.ToString(), entity.Location.Y.ToString()));
-                GameObject entityObj = Instantiate(_prefabs[entity.Type.Name], chunk.Object.transform);
-                entityObj.SetActive(true);
-                entityObj.name = string.Format("{0};{1},{2}", "entity:human", entity.Location.X.ToString(), entity.Location.Y.ToString());
-                entityObj.transform.position = new Vector3(entity.Location.X + 0.5F, entity.Location.Y + 0.5F, -0.2F);
-                chunk.Objects.Add(entityObj);
-            }
-            Destroy(chunkObj);
-        }
-
-        /// <summary>
-        /// Deletes all the user viewable Objects in a chunk.
-        /// </summary>
-        /// <param name="chunk">The chunk to unload.</param>
-        private void UnloadChunk(Chunk chunk)
-        {
-            foreach (var obj in chunk.Objects)
-            {
-                Destroy(obj);
-            }
-            chunk.Objects.Clear();
-            Destroy(chunk.Object);
-            chunk.Object = null;
+            Entities.LoadAll(toAdd);
         }
     }
 }

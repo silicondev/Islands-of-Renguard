@@ -8,62 +8,68 @@ using System.Threading.Tasks;
 
 namespace dEvine_and_conquer.AI.Pathfinding.AStar
 {
-    internal class AStarTile
+    internal class AStarTile : VisualObject
     {
         public float f = 0;
         public float g = 0;
         public float h = 0;
         public List<AStarTile> Local = new List<AStarTile>();
-        public AStarTile Prev = null;
-        public Tile Tile;
+        public AStarTile Prev { get; set; } = null;
+        public Block Block { get; }
+        public bool IsWall => Block.IsCollidable;
 
-        public bool IsWall { get
-            {
-                return Tile.Type.IsCollidable;
-            } 
+        public AStarTile(Block block) : base(block.Location)
+        {
+            Block = block;
         }
 
-        public AStarTile(Tile tile)
+        public void RefreshLocal(List<AStarTile> grid)
         {
-            Tile = tile;
-        }
+            int x = Block.Location.X.Floor();
+            int y = Block.Location.Y.Floor();
 
-        public void RefreshLocal(XYContainer<AStarTile> grid)
-        {
-            int x = (int)Tile.Location.X;
-            int y = (int)Tile.Location.Y;
-
-            if (grid == null || grid.Value[0] == null || grid.Value[0][0] == null)
+            if (grid == null)
                 return;
 
             Local.Clear();
 
-            int rows = grid.Value[0].Count();
-            int cols = grid.Value.Count();
+            bool e = grid.Contains(x + 1, y);
+            bool w = grid.Contains(x - 1, y);
+            bool n = grid.Contains(x, y + 1);
+            bool s = grid.Contains(x, y - 1);
 
-            bool xa = x < cols - 1;
-            bool xb = x > 0;
-            bool ya = y < rows - 1;
-            bool yb = y > 0;
+            bool ne = grid.Contains(x + 1, y + 1);
+            bool nw = grid.Contains(x - 1, y + 1);
+            bool se = grid.Contains(x + 1, y - 1);
+            bool sw = grid.Contains(x - 1, y - 1);
 
-            AStarTile gxa = xa ? grid.Value[x + 1][y] : null;
-            AStarTile gxb = xb ? grid.Value[x - 1][y] : null;
-            AStarTile gya = ya ? grid.Value[x][y + 1] : null;
-            AStarTile gyb = yb ? grid.Value[x][y - 1] : null;
-            AStarTile gxyaa = (xa && ya) ? grid.Value[x + 1][y + 1] : null;
-            AStarTile gxyba = (xb && ya) ? grid.Value[x - 1][y + 1] : null;
-            AStarTile gxyab = (xa && yb) ? grid.Value[x + 1][y - 1] : null;
-            AStarTile gxybb = (xb && yb) ? grid.Value[x - 1][y - 1] : null;
+            AStarTile te = e ? grid.Get(x + 1, y) : null;
+            AStarTile tw = w ? grid.Get(x - 1, y) : null;
+            AStarTile tn = n ? grid.Get(x, y + 1) : null;
+            AStarTile ts = s ? grid.Get(x, y - 1) : null;
+            AStarTile tne = ne ? grid.Get(x + 1, y + 1) : null;
+            AStarTile tnw = nw ? grid.Get(x - 1, y + 1) : null;
+            AStarTile tse = se ? grid.Get(x + 1, y - 1) : null;
+            AStarTile tsw = sw ? grid.Get(x - 1, y - 1) : null;
 
-            if (xa && !gxa.IsWall) Local.Add(gxa);
-            if (xb && !gxb.IsWall) Local.Add(gxb);
-            if (ya && !gya.IsWall) Local.Add(gya);
-            if (yb && !gyb.IsWall) Local.Add(gyb);
+            bool we = e ? te.IsWall : true;
+            bool ww = w ? tw.IsWall : true;
+            bool wn = n ? tn.IsWall : true;
+            bool ws = s ? ts.IsWall : true;
+            bool wne = ne ? tne.IsWall : true;
+            bool wnw = nw ? tnw.IsWall : true;
+            bool wse = se ? tse.IsWall : true;
+            bool wsw = sw ? tsw.IsWall : true;
 
-            if (xa && ya && !gxyaa.IsWall && !(gxa.IsWall && gya.IsWall)) Local.Add(gxyaa);
-            if (xb && ya && !gxyba.IsWall && !(gxb.IsWall && gya.IsWall)) Local.Add(gxyba);
-            if (xa && yb && !gxyab.IsWall && !(gxa.IsWall && gyb.IsWall)) Local.Add(gxyab);
-            if (xb && yb && !gxybb.IsWall && !(gxb.IsWall && gyb.IsWall)) Local.Add(gxybb);
+            if (!we) Local.Add(te);
+            if (!ww) Local.Add(tw);
+            if (!wn) Local.Add(tn);
+            if (!ws) Local.Add(ts);
+
+            if (!wne && !wn && !we) Local.Add(tne);
+            if (!wnw && !wn && !ww) Local.Add(tnw);
+            if (!wse && !ws && !we) Local.Add(tse);
+            if (!wsw && !ws && !ww) Local.Add(tsw);
         }
     }
 }

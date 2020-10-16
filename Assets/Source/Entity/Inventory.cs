@@ -1,4 +1,5 @@
-﻿using dEvine_and_conquer.Object;
+﻿using dEvine_and_conquer.Base;
+using dEvine_and_conquer.Object;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,14 +10,14 @@ namespace dEvine_and_conquer.Entity
 {
     public class Inventory
     {
-        private List<Item> _items;
-        private Item _nullItem = new Item(ItemID.GENERIC.VOID);
+        private List<ItemBag> _items;
+        private ItemBag _nullItem = new ItemBag(ObjectID.ITEM.GENERIC.VOID);
         public int Slots { get; }
 
         public Inventory(int slots)
         {
             Slots = slots;
-            _items = new List<Item>();
+            _items = new List<ItemBag>();
             for (int i = 0; i < slots; i++) _items.Add(_nullItem);
         }
 
@@ -29,13 +30,13 @@ namespace dEvine_and_conquer.Entity
             }
         }
 
-        public Item GetItem(int slot)
+        public ItemBag GetItem(int slot)
         {
             if (slot < 0 || slot > Slots) return _nullItem;
             return _items[slot];
         }
 
-        public void SetItem(Item item, int slot)
+        public void SetItem(ItemBag item, int slot)
         {
             if (slot < 0 || slot > Slots) return;
             _items[slot] = item;
@@ -47,11 +48,9 @@ namespace dEvine_and_conquer.Entity
             for (int i = 0; i < Slots; i++) _items[i] = _nullItem;
         }
 
-        public List<Item> GetCopy()
+        public List<ItemBag> GetCopy()
         {
-            List<Item> output = new List<Item>();
-            foreach (var item in _items) output.Add(item);
-            return output;
+            return new List<ItemBag>(_items);
         }
     }
 }

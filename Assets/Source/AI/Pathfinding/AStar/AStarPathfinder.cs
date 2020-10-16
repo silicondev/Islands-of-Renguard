@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace dEvine_and_conquer.AI.Pathfinding.AStar
 {
@@ -14,62 +15,75 @@ namespace dEvine_and_conquer.AI.Pathfinding.AStar
         private AStarTile _closest;
         private List<AStarTile> _openSet = new List<AStarTile>();
         private List<AStarTile> _closedSet = new List<AStarTile>();
-        private List<AStarTile> _path = new List<AStarTile>();
+        private List<Point> _path = new List<Point>();
         private AStarTile _start;
         private AStarTile _end;
-        private int _cols => _tiles.Value.Count();
-        private int _rows => _tiles.Value[0].Count();
-        private XYContainer<Tile> _tiles;
-        private XYContainer<AStarTile> _gridHold;
-        private XYContainer<AStarTile> _grid
+        private float _maxScopeVal = 100;
+        private int _scopeDiv = 2;
+        private List<Block> _blocks;
+        private List<AStarTile> _gridHold;
+        private List<AStarTile> _grid
         {
             get
             {
-                if (_gridHold == null)
-                {
-                    List<List<AStarTile>> tmp = new List<List<AStarTile>>();
-
-                    for (int y = 0; y < _rows; y++)
-                    {
-                        tmp.Add(new List<AStarTile>());
-                        for (int x = 0; x < _cols; x++)
-                        {
-                            var tile = new AStarTile(_tiles.Value[x][y]);
-                            tmp[y].Add(tile);
-                        }
-                    }
-
-                    _gridHold = tmp;
-                }
+                if (_gridHold == null) ReloadGrid();
                 return _gridHold;
             }
         }
 
-        public AStarPathfinder(List<List<Tile>> tiles)
+        public AStarPathfinder(List<Block> blocks)
         {
-            _tiles = tiles;
+            _blocks = blocks;
         }
 
-        public List<Tile> GetPath(Point start, Point end)
+        public AStarPathfinder()
         {
-            if (_tiles == null || _tiles.Value[0] == null || _tiles.Value[0][0] == null)
-                return null;
+
+        }
+
+        private void ReloadGrid()
+        {
+            List<AStarTile> tmp = new List<AStarTile>();
+
+            foreach (var block in _blocks)
+            {
+                tmp.Add(new AStarTile(block));
+            }
+
+            _gridHold = tmp;
+        }
+
+        public void UpdateWorld(List<Block> blocks)
+        {
+            _blocks = blocks;
+            _gridHold = null;
+        }
+        public List<Point> GetPath(Point start, Point end)
+        {
+            _path.Clear();
+
+            if (_grid == null) ReloadGrid();
+
+            if (_blocks == null)
+                return _path;
 
             _openSet.Clear();
             _closedSet.Clear();
 
-            for (int y = 0; y < _rows; y++)
-            {
-                for (int x = 0; x < _cols; x++)
-                {
-                    var tile = _grid.Value[x][y];
+            _start = _grid.Get(start);
+            _end = _grid.Get(end);
 
-                    var pnt = new Point(x, y);
-                    if (pnt == start)
-                        _start = tile;
-                    else if (pnt == end)
-                        _end = tile;
-                }
+            List<AStarTile> scope = new List<AStarTile>();
+
+            var seh = PlaneFunctions.Heuristic(_start.Location, _end.Location);
+            var seScope = Mathf.Clamp(seh / _scopeDiv, 0, _maxScopeVal);
+
+            foreach (var tile in _grid)
+            {
+                var s = PlaneFunctions.Heuristic(tile.Location, _start.Location);
+                var e = PlaneFunctions.Heuristic(tile.Location, _end.Location);
+                var h = s + e;
+                if (h <= seh + seScope) scope.Add(tile);
             }
 
             _openSet.Add(_start);
@@ -89,30 +103,23 @@ namespace dEvine_and_conquer.AI.Pathfinding.AStar
                 _openSet.Remove(_closest);
                 _closedSet.Add(_closest);
 
+                // PATH COMPLETE
                 if (_closest == _end)
                 {
-                    _path.Clear();
                     AStarTile tmp = _closest;
-                    _path.Add(tmp);
+                    _path.Add(tmp.Location);
                     while (tmp.Prev != null)
                     {
-                        _path.Add(tmp.Prev);
+                        _path.Add(tmp.Prev.Location);
                         tmp = tmp.Prev;
                     }
-                    List<Tile> output = new List<Tile>();
-                    foreach (var i in _path)
-                    {
-                        output.Add(i.Tile);
-                    }
-                    return output;
+                    _path.Reverse();
+                    break;
                 }
 
-                for (int y = 0; y < _rows; y++)
+                foreach (var tile in scope)
                 {
-                    for (int x = 0; x < _cols; x++)
-                    {
-                        _grid.Value[x][y].RefreshLocal(_grid);
-                    }
+                    tile.RefreshLocal(scope);
                 }
 
                 for (int i = 0; i < _closest.Local.Count(); i++)
@@ -122,7 +129,7 @@ namespace dEvine_and_conquer.AI.Pathfinding.AStar
                     if (_closedSet.Contains(local))
                         continue;
 
-                    float g = _closest.g + _heuristic(local, _closest);
+                    float g = _closest.g + PlaneFunctions.Heuristic(local.Location, _closest.Location);
 
                     bool newPath = false;
                     if (_openSet.Contains(local))
@@ -141,37 +148,14 @@ namespace dEvine_and_conquer.AI.Pathfinding.AStar
 
                     if (newPath)
                     {
-                        local.h = _heuristic(local, _end);
+                        local.h = PlaneFunctions.Heuristic(local.Location, _end.Location);
                         local.f = local.g + local.h;
                         local.Prev = _closest;
                     }
                 }
             }
 
-            return null;
-        }
-
-        private float _heuristic(AStarTile a, AStarTile b)
-        {
-            int ax = (int)a.Tile.Location.X;
-            int ay = (int)a.Tile.Location.Y;
-            int bx = (int)b.Tile.Location.X;
-            int by = (int)b.Tile.Location.Y;
-
-            double x = Math.Pow(_difference(ax, bx), 2);
-            double y = Math.Pow(_difference(ay, by), 2);
-            double z = Math.Sqrt(x + y);
-            return (float)z;
-        }
-
-        private int _difference(int a, int b)
-        {
-            if (a > b)
-                return a - b;
-            else if (b > a)
-                return b - a;
-            else
-                return 0;
+            return _path;
         }
     }
 }
