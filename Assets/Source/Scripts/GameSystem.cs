@@ -224,6 +224,7 @@ namespace dEvine_and_conquer.Scripts
         /// </summary>
         private void RegenChunks()
         {
+            Timer.Start("RegenChunks");
             int posX = (int)Player.Location.X;
             int posY = (int)Player.Location.Y;
 
@@ -255,7 +256,6 @@ namespace dEvine_and_conquer.Scripts
                     if (Chunks.GetGenerated().GetChunk(id) != null)
                     {
                         newChunk = new Chunk(id, Generator, Chunks.GetGenerated().GetChunk(id).Blocks);
-                        Debug.Log(string.Format("Found generated Chunk ID {0} with {1} blocks.", newChunk.IDStr, newChunk.Blocks.Length.ToString()));
                     } else
                     {
                         newChunk = new Chunk(id, Generator);
@@ -291,6 +291,7 @@ namespace dEvine_and_conquer.Scripts
 
             _current = Chunks.GetLoaded().GetContains(new Point(posX, posY));
             Chunks.GetLoaded().UpdateAll();
+            Debug.Log(string.Format("Regen Chunks took {0} seconds.", Timer.Stop("RegenChunks").ToString("F4")));
         }
 
         private void RegenEntities()
