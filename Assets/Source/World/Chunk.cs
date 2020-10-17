@@ -17,14 +17,14 @@ namespace dEvine_and_conquer.World
         private GameSystem _system;
         public int xPos { get; private set; }
         public int yPos { get; private set; }
-        public string IDStr => ((int)ID.X).ToString() + ";" + ((int)ID.Y).ToString();
+        public string IDStr => $"{ID.X.Floor()};{ID.Y.Floor()}";
 
         public Point ID
         {
             get
             {
                 int chunkS = _generator.ChunkSize;
-                return new Point(xPos / chunkS, yPos / chunkS);
+                return (xPos / chunkS, yPos / chunkS);
             }
         }
 
@@ -50,7 +50,7 @@ namespace dEvine_and_conquer.World
 
         public Chunk(Point id, Generator gen)
         {
-            Setup((int)id.X * gen.ChunkSize, (int)id.Y * gen.ChunkSize, gen);
+            Setup(id.X.Floor() * gen.ChunkSize, id.Y.Floor() * gen.ChunkSize, gen);
         }
 
         public Chunk(int x, int y, Generator gen, Block[] blocks)
@@ -60,7 +60,7 @@ namespace dEvine_and_conquer.World
 
         public Chunk(Point id, Generator gen, Block[] blocks)
         {
-            Setup((int)id.X * gen.ChunkSize, (int)id.Y * gen.ChunkSize, gen, blocks);
+            Setup(id.X.Floor() * gen.ChunkSize, id.Y.Floor() * gen.ChunkSize, gen, blocks);
         }
 
         private void Setup(int x, int y, Generator gen, Block[] blocks = null)

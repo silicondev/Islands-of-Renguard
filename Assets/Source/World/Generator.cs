@@ -33,8 +33,8 @@ namespace dEvine_and_conquer.World
 
         public Block[] GenerateChunk(Point id)
         {
-            int xChunkPos = (int)id.X * ChunkSize;
-            int yChunkPos = (int)id.Y * ChunkSize;
+            int xChunkPos = id.X.Floor() * ChunkSize;
+            int yChunkPos = id.Y.Floor() * ChunkSize;
             float xStart = Seed + xChunkPos;
             float yStart = Seed + yChunkPos;
 
@@ -54,7 +54,7 @@ namespace dEvine_and_conquer.World
                     Prefab tile = Mapper.ParseHeight(height);
                     Prefab overlay =
                         tile == ObjectID.ENV.TILE.GRASS &&
-                        TreeGen(new Point(perlinX, perlinY), height) ?
+                        TreeGen((perlinX, perlinY), height) ?
                             ObjectID.ENV.OVERLAY.TREE :
                             ObjectID.ENV.VOID;
 

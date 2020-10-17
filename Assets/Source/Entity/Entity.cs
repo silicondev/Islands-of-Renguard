@@ -81,7 +81,7 @@ namespace dEvine_and_conquer.Entity
             if (currentFrame >= Textures.Count) currentFrame = 0;
         }
 
-        public void GoTo(Point destination)
+        public async Task GoTo(Point destination)
         {
             if (destination == Location) return;
 
@@ -94,11 +94,12 @@ namespace dEvine_and_conquer.Entity
             }
 
             Pathfinder.UpdateWorld(blocks);
-            currentPath = Pathfinder.GetPath(Location, destination);
+            currentPath = await Task.Run(() => Pathfinder.GetPath(Location, destination));
             if (currentPath != null && currentPath.Any())
             {
                 isMoving = true;
-                Debug.Log(string.Format("{0} Entity is moving from {1},{2} to {3},{4}", Type.Name, Location.X.ToString(), Location.Y.ToString(), destination.X.ToString(), destination.Y.ToString()));
+                //Debug.Log(string.Format("{0} Entity is moving from {1},{2} to {3},{4}", Type.Name, Location.X.ToString(), Location.Y.ToString(), destination.X.ToString(), destination.Y.ToString()));
+                Debug.Log($"{Type.Name} Entity is moving from {Location} to {destination}");
             }
         }
     }

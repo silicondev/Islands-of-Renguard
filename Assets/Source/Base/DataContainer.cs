@@ -8,7 +8,7 @@ namespace Assets.Source.Base
 {
     public class DataContainer
     {
-        public Dictionary<string, object> Data { get; private set; } = new Dictionary<string, object>();
+        protected Dictionary<string, object> Data { get; private set; } = new Dictionary<string, object>();
 
         public string GetString(string id) => Data.ContainsKey(id) && Data[id] is string value ? value : "ERR";
 
@@ -17,5 +17,6 @@ namespace Assets.Source.Base
         public float GetFloat(string id) => Data.ContainsKey(id) && Data[id] is float value ? value : -1;
 
         public int GetInt(string id) => Data.ContainsKey(id) && Data[id] is int value ? value : -1;
+        public bool DataContainsKey(string id) => Data.ContainsKey(id);
     }
 }

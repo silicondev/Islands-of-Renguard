@@ -14,7 +14,7 @@ namespace dEvine_and_conquer.Base
 
         public VisualObject(float x, float y)
         {
-            Location = new Point(x, y);
+            Location = (x, y);
         }
 
         public VisualObject(Point loc)

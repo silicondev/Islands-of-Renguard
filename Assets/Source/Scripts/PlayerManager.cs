@@ -8,25 +8,25 @@ namespace dEvine_and_conquer.Scripts
 {
     public class PlayerManager : Script
     {
-        private float _defaultZoom = 7F;
+        private float _defaultZoom = 10F;
         private float _defaultMoveSpeed = 0.2F;
         private int _viewDisModX = 1;
         private int _viewDisModY = 1;
-        private int _viewBuffer = 5;
+        public readonly int ViewBuffer = 5;
 
         public bool CanMove { get; set; } = true;
         public Point ViewDis { 
             get 
             {
                 var zoomMod = CurrentZoom / _defaultZoom;
-                return new Point((int)(_viewDisModX * zoomMod) + _viewBuffer, (int)(_viewDisModY * zoomMod) + _viewBuffer);
+                return (((_viewDisModX * zoomMod) + ViewBuffer).Floor(), ((_viewDisModY * zoomMod) + ViewBuffer).Floor());
             }
         }
-        public float MoveSpeed => (_defaultMoveSpeed / _defaultZoom) * CurrentZoom;
+        public float MoveSpeed => (_defaultMoveSpeed / (_defaultZoom * 2)) * (CurrentZoom * 2);
         public float ZoomSpeed { get; private set; } = 0.7F;
         public float SmoothSpeed { get; private set; } = 10.0F;
-        public float MinZoom { get; private set; } = 1.0F;
-        public float MaxZoom { get; private set; } = 10.0F;
+        public float MinZoom { get; private set; } = 5.0F;
+        public float MaxZoom { get; private set; } = 20.0F;
         public float TargetZoom { get; private set; }
         public float CurrentZoom
         {
@@ -49,6 +49,7 @@ namespace dEvine_and_conquer.Scripts
         private void Start()
         {
             TargetZoom = _defaultZoom;
+            Camera.main.orthographicSize = _defaultZoom;
         }
 
         private void Update()

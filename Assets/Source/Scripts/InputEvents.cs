@@ -49,6 +49,7 @@ namespace dEvine_and_conquer.Scripts
             }
 
             RunKey(KeyCode.G);
+            RunKey(KeyCode.T);
             RunKey(KeyCode.H);
             RunKey(KeyCode.Q);
             RunKey(KeyCode.Escape);

@@ -4,6 +4,7 @@ using dEvine_and_conquer.Scripts;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -55,7 +56,8 @@ namespace dEvine_and_conquer.World
             {
                 if (!item.Contains(block.Location))
                 {
-                    Debug.Log(string.Format("Attempting to load Block {0},{1} into Chunk {2} has failed.", block.Location.X.ToString(), block.Location.Y.ToString(), item.IDStr));
+                    //Debug.Log(string.Format("Attempting to load Block {0},{1} into Chunk {2} has failed.", block.Location.X.ToString(), block.Location.Y.ToString(), item.IDStr));
+                    Debug.Log($"Attempting to load Block {block.Location} into Chunk {item.IDStr} has failed.");
                 }
 
                 GameObject obj = VisualContainer.CreateObject(block.Tile.Type.IdName, block.Location, 0, item.Object.transform);

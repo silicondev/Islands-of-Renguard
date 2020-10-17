@@ -3,10 +3,12 @@ using dEvine_and_conquer.Base;
 using dEvine_and_conquer.World;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 namespace dEvine_and_conquer.AI.Pathfinding.AStar
 {
@@ -15,11 +17,19 @@ namespace dEvine_and_conquer.AI.Pathfinding.AStar
         private AStarTile _closest;
         private List<AStarTile> _openSet = new List<AStarTile>();
         private List<AStarTile> _closedSet = new List<AStarTile>();
+        private List<AStarTile> _fullSet
+        {
+            get
+            {
+                List<AStarTile> full = new List<AStarTile>();
+                full.AddRange(_closedSet);
+                full.AddRange(_openSet);
+                return full;
+            }
+        }
         private List<Point> _path = new List<Point>();
         private AStarTile _start;
         private AStarTile _end;
-        private float _maxScopeVal = 100;
-        private int _scopeDiv = 2;
         private List<Block> _blocks;
         private List<AStarTile> _gridHold;
         private List<AStarTile> _grid
@@ -60,6 +70,9 @@ namespace dEvine_and_conquer.AI.Pathfinding.AStar
         }
         public List<Point> GetPath(Point start, Point end)
         {
+            //Timer.Start("Pathfinding");
+            var watchFull = Stopwatch.StartNew();
+
             _path.Clear();
 
             if (_grid == null) ReloadGrid();
@@ -73,32 +86,28 @@ namespace dEvine_and_conquer.AI.Pathfinding.AStar
             _start = _grid.Get(start);
             _end = _grid.Get(end);
 
-            List<AStarTile> scope = new List<AStarTile>();
-
-            var seh = PlaneFunctions.Heuristic(_start.Location, _end.Location);
-            var seScope = Mathf.Clamp(seh / _scopeDiv, 0, _maxScopeVal);
-
-            foreach (var tile in _grid)
-            {
-                var s = PlaneFunctions.Heuristic(tile.Location, _start.Location);
-                var e = PlaneFunctions.Heuristic(tile.Location, _end.Location);
-                var h = s + e;
-                if (h <= seh + seScope) scope.Add(tile);
-            }
-
             _openSet.Add(_start);
 
+            float loopTotal = 0;
+            int iter = 0;
             while (_openSet.Count > 0)
             {
+                var watchLoop = Stopwatch.StartNew();
+                //Timer.Start("Pathfinding.Loop");
                 int low = 0;
 
                 for (int i = 0; i < _openSet.Count; i++)
                 {
-                    if (_openSet[i].f < _openSet[low].f)
+                    if (_openSet[i].h < _openSet[low].h)
                         low = i;
                 }
 
                 _closest = _openSet[low];
+
+                foreach (var tile in _openSet)
+                {
+                    tile.RefreshLocal(_grid);
+                }
 
                 _openSet.Remove(_closest);
                 _closedSet.Add(_closest);
@@ -117,15 +126,8 @@ namespace dEvine_and_conquer.AI.Pathfinding.AStar
                     break;
                 }
 
-                foreach (var tile in scope)
+                foreach (var local in _closest.Local)
                 {
-                    tile.RefreshLocal(scope);
-                }
-
-                for (int i = 0; i < _closest.Local.Count(); i++)
-                {
-                    AStarTile local = _closest.Local[i];
-
                     if (_closedSet.Contains(local))
                         continue;
 
@@ -139,7 +141,8 @@ namespace dEvine_and_conquer.AI.Pathfinding.AStar
                             local.g = g;
                             newPath = true;
                         }
-                    } else
+                    }
+                    else
                     {
                         local.g = g;
                         newPath = true;
@@ -151,10 +154,30 @@ namespace dEvine_and_conquer.AI.Pathfinding.AStar
                         local.h = PlaneFunctions.Heuristic(local.Location, _end.Location);
                         local.f = local.g + local.h;
                         local.Prev = _closest;
+
+                        //_closest = local;
                     }
                 }
+
+                if (Timer.Current("Pathfinding") >= 10f)
+                {
+                    //Timer.StopAndLog("Pathfinding");
+                    Debug.Log("Pathfinding stopped due to hanging.");
+                    break;
+                }
+
+                //loopTotal += Timer.Stop("Pathfinding.Loop");
+                loopTotal += watchLoop.StopAndReturn();
+                watchLoop.Stop();
+                iter++;
             }
 
+            Debug.Log($"Pathfinding loop took {(loopTotal / iter).ToString("F4")} seconds on average to complete");
+            Debug.Log($"Pathfinding went through {iter} iterations");
+
+            Debug.Log($"Pathfinding should have taken around {loopTotal.ToString("F4")} seconds to complete and took {watchFull.StopAndReturn()} to complete.");
+            //watchFull.StopAndLog("Pathfinding");
+            //Timer.StopAndLog("Pathfinding");
             return _path;
         }
     }

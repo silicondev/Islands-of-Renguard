@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.ComTypes;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -32,6 +33,9 @@ namespace dEvine_and_conquer.Scripts
 
         public Block CurrentBlock => Chunks.GetLoaded().GetBlockFromID(Player.Location);
         public static Block StartBlock = null;
+
+        private bool _debugMode = false;
+
         void Awake()
         {
             Instance = this;
@@ -66,9 +70,12 @@ namespace dEvine_and_conquer.Scripts
             foreach (var obj in Prefabs)
             {
                 obj.Value.transform.position = new Vector3(0, 0, 10);
-                //var renderer = obj.Value.GetComponent<SpriteRenderer>();
-                //var clr = renderer.color;
-                //renderer.color = new Color(clr.r, clr.g, clr.b, 0.2f);
+                if (_debugMode)
+                {
+                    var renderer = obj.Value.GetComponent<SpriteRenderer>();
+                    var clr = renderer.color;
+                    renderer.color = new Color(clr.r, clr.g, clr.b, 0.2f);
+                }
                 obj.Value.SetActive(false);
                 obj.Value.name = obj.Key + ";PREFAB";
             }
@@ -85,7 +92,7 @@ namespace dEvine_and_conquer.Scripts
             if (playerObj != null)
             {
                 Player = playerObj.GetComponent<PlayerManager>();
-                Player.Location = new Point(0, 0);
+                Player.Location = (0, 0);
             }
             else
                 Debug.LogError("Could not find Player Object");
@@ -104,6 +111,7 @@ namespace dEvine_and_conquer.Scripts
         {
             Chunks.GetLoaded().UpdateAll();
             Entities.GetLoaded().UpdateAll();
+            if (_debugMode) ForceRegen(true);
         }
 
         /// <summary>
@@ -115,10 +123,12 @@ namespace dEvine_and_conquer.Scripts
         {
             Player.OnMove(sender, e);
 
+            var w = Screen.width;
+            var h = Screen.height;
             var sev = new Vector3(0, 0, 0);
-            var nev = new Vector3(0, Screen.height, 0);
-            var swv = new Vector3(Screen.width, 0, 0);
-            var nwv = new Vector3(Screen.width, Screen.height, 0);
+            var nev = new Vector3(0, h, 0);
+            var swv = new Vector3(w, 0, 0);
+            var nwv = new Vector3(w, h, 0);
 
             var se = GetBlockFromScreen(sev);
             var ne = GetBlockFromScreen(nev);
@@ -130,8 +140,8 @@ namespace dEvine_and_conquer.Scripts
                 sw == null ||
                 nw == null)
             {
-                RegenChunks();
                 RegenEntities();
+                RegenChunks();
             }
         }
 
@@ -154,10 +164,21 @@ namespace dEvine_and_conquer.Scripts
                 } else
                     Debug.Log("ERROR: Could not add entity to world.");
             }
-            else if (args.KeyPressed == KeyCode.H && TileSelected)
+            else if (args.KeyPressed == KeyCode.T && TileSelected)
             {
-                var entity = Entities.GetLoaded()[Random.Range(0, Entities.LoadedCount() - 1)];
-                entity.GoTo(SelectedTile);
+                var entity = Entities.GetLoaded()[Random.Range(0, Entities.LoadedCount())];
+                _ = entity.GoTo(SelectedTile);
+            } else if (args.KeyPressed == KeyCode.H && TileSelected)
+            {
+                var block = Chunks.GetLoaded().GetBlockFromID(SelectedTile);
+                var overlay = block.Overlay;
+                var items = overlay.Harvest();
+                foreach (var item in items)
+                {
+                    Debug.Log($"Harvested {item.Id.Name} x {item.Amount} from {block.Overlay.Type.Name}");
+                }
+                overlay.Type = ObjectID.ENV.VOID;
+                ForceRegen();
             } else if (args.KeyPressed == KeyCode.Q)
             {
                 ForceRegen(true);
@@ -178,7 +199,7 @@ namespace dEvine_and_conquer.Scripts
                     Debug.Log("ERROR: Could not find object.");
                 else
                 {
-                    Debug.Log(string.Format("Tile: {0}. Overlay: {1}", block.Tile.Type.Name, block.Overlay.Type.Name));
+                    Debug.Log($"Tile: {block.Tile.Type.Name}. Overlay: {block.Overlay.Type.Name}");
 
                     SelectedTile = block.Location;
                     TileSelected = true;
@@ -202,21 +223,21 @@ namespace dEvine_and_conquer.Scripts
         private static Point ScreenToWorld(Vector3 position)
         {
             var vPos = Camera.main.ScreenToWorldPoint(position);
-            return new Point(vPos.x, vPos.y);
+            return (vPos.x, vPos.y);
         }
 
         private void StartupGenerate()
         {
-            RegenChunks();
             RegenEntities();
+            RegenChunks();
             StartBlock = CurrentBlock;
         }
 
         private void ForceRegen(bool incEntities = true)
         {
             Chunks.UnloadAll();
-            RegenChunks();
             if (incEntities) RegenEntities();
+            RegenChunks();
         }
 
         /// <summary>
@@ -225,17 +246,18 @@ namespace dEvine_and_conquer.Scripts
         private void RegenChunks()
         {
             Timer.Start("RegenChunks");
-            int posX = (int)Player.Location.X;
-            int posY = (int)Player.Location.Y;
+            var pos = Player.Location.Flatten();
 
             var bottomLeft = ScreenToWorld(new Vector3(0, 0, 0));
             var topRight = ScreenToWorld(new Vector3(Screen.width, Screen.height, 0));
 
+            Point buffer = (Player.ViewBuffer, Player.ViewBuffer);
+
             bool hasNewChunks = false;
             List<Chunk> foundChunks = new List<Chunk>();
-            for (int y = (bottomLeft.Y - Player.ViewDis.Y).Floor(); y < (topRight.Y + Player.ViewDis.Y).Floor(); y++)
+            for (int y = (bottomLeft.Y - buffer.Y).Floor(); y < (topRight.Y + buffer.Y).Floor(); y++)
             {
-                for (int x = (bottomLeft.X.Floor() - Player.ViewDis.X).Floor(); x < (topRight.X.Floor() + Player.ViewDis.X).Floor(); x++)
+                for (int x = (bottomLeft.X.Floor() - buffer.X).Floor(); x < (topRight.X.Floor() + buffer.X).Floor(); x++)
                 {
                     // If chunk is already loaded, then skip this loop
                     if (!foundChunks.Contains(x, y))
@@ -250,25 +272,15 @@ namespace dEvine_and_conquer.Scripts
                         continue;
 
                     // Find chunk if exists
-                    var id = new Point((int)Math.Floor(x / 16d), (int)Math.Floor(y / 16d));
-                    //var newChunk = Chunks.GetGenerated().GetChunk(id) ?? new Chunk(id, Generator);
-                    Chunk newChunk;
-                    if (Chunks.GetGenerated().GetChunk(id) != null)
+                    Point id = ((x / 16f).Floor(), (y / 16f).Floor());
+                    var newChunk = Chunks.GetGenerated().GetChunk(id) ?? new Chunk(id, Generator);
+
+                    // Chunk does not already exist, generate a new one.
+                    if (!newChunk.IsGenerated)
                     {
-                        newChunk = new Chunk(id, Generator, Chunks.GetGenerated().GetChunk(id).Blocks);
-                    } else
-                    {
-                        newChunk = new Chunk(id, Generator);
                         hasNewChunks = true;
                         Chunks.Generate(newChunk);
                     }
-
-                    // Chunk does not already exist, generate a new one.
-                    //if (!newChunk.IsGenerated)
-                    //{
-                    //    hasNewChunks = true;
-                    //    Chunks.Generate(newChunk);
-                    //}
 
                     // Load chunk
                     Chunks.Load(newChunk, transform);
@@ -289,9 +301,9 @@ namespace dEvine_and_conquer.Scripts
             }
             Chunks.UnloadAll(removeChunks);
 
-            _current = Chunks.GetLoaded().GetContains(new Point(posX, posY));
+            _current = Chunks.GetLoaded().GetContains(pos);
             Chunks.GetLoaded().UpdateAll();
-            Debug.Log(string.Format("Regen Chunks took {0} seconds.", Timer.Stop("RegenChunks").ToString("F4")));
+            Timer.StopAndLog("RegenChunks");
         }
 
         private void RegenEntities()

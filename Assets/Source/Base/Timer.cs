@@ -40,6 +40,21 @@ namespace dEvine_and_conquer.Base
             return 0;
         }
 
+        public static float Current(string id)
+        {
+            if (!_timers.ContainsKey(id) || !_timers[id].IsRunning)
+                return 0;
+            return Time.realtimeSinceStartup - _timers[id].Start;
+        }
+
+        public static void StopAndLog(string id)
+        {
+            var time = Stop(id);
+            if (time > 0)
+                Debug.Log($"{id} took {time.ToString("F4")} seconds to complete.");
+                //Debug.Log(string.Format("{0} took {1} seconds to complete.", id, time.ToString("F4")));
+        }
+
         public static void Remove(string id)
         {
             _timers.Remove(id);

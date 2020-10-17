@@ -10,10 +10,21 @@ namespace dEvine_and_conquer.Base
         public float X = 0;
         public float Y = 0;
 
+        public static implicit operator Point((float x, float y) value)
+        {
+            return new Point(value);
+        }
+
         public Point(float x, float y)
         {
             X = x;
             Y = y;
+        }
+
+        public Point((float x, float y) value)
+        {
+            X = value.x;
+            Y = value.y;
         }
 
         public bool Equals(Point other)
@@ -54,7 +65,7 @@ namespace dEvine_and_conquer.Base
             Y += y;
         }
 
-        public Point Flatten() => new Point(X.Floor(), Y.Floor());
+        public Point Flatten() => (X.Floor(), Y.Floor());
 
         public bool IsContainedInCross(Point tl, Point tr, Point bl, Point br)
         {
@@ -67,6 +78,8 @@ namespace dEvine_and_conquer.Base
             return fullArea == realArea;
         }
 
-        public Point Copy() => new Point(X, Y);
+        public Point Copy() => (X, Y);
+
+        public override string ToString() => $"{X},{Y}";
     }
 }

@@ -12,7 +12,7 @@ namespace dEvine_and_conquer.Base
     {
         public void Move(float x, float y)
         {
-            Move(new Point(x, y));
+            Move((x, y));
         }
 
         public void Move(Point loc)

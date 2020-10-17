@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 namespace dEvine_and_conquer.Base
 {
@@ -20,6 +23,19 @@ namespace dEvine_and_conquer.Base
             if (b < a) return val >= b && val < a;
             if (a == b) return a == val;
             return false;
+        }
+
+        public static float StopAndReturn(this Stopwatch watch)
+        {
+            watch.Stop();
+            return (float)watch.Elapsed.TotalSeconds;
+        }
+
+        public static float StopAndLog(this Stopwatch watch, string name)
+        {
+            float secs = watch.StopAndReturn();
+            Debug.Log($"{name} took {secs.ToString("F4")} seconds to complete.");
+            return secs;
         }
     }
 }
