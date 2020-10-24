@@ -86,6 +86,53 @@ namespace dEvine_and_conquer.AI.Pathfinding.AStar
             _start = _grid.Get(start);
             _end = _grid.Get(end);
 
+            if (_end.IsWall)
+            {
+                var oldEndLoc = _end.Location.Copy();
+                var queue = new List<AStarTile>();
+                queue.Add(_end);
+                int i = 0;
+                while (i < 500)
+                {
+                    var tmp = queue[i];
+                    tmp.RefreshLocal(_grid);
+                    var foundList = new List<AStarTile>();
+                    foreach (var local in tmp.Local)
+                    {
+                        if (!local.IsWall)
+                            foundList.Add(local);
+                        else
+                            queue.Add(local);
+                    }
+                    if (foundList.Any())
+                    {
+                        var low = 0;
+                        var lowF = -1.0f;
+                        for (int f = 0; f < foundList.Count(); f++)
+                        {
+                            var newF = PlaneFunctions.Heuristic(_start.Location, foundList[f].Location) + PlaneFunctions.Heuristic(_end.Location, foundList[f].Location);
+                            if (lowF < 0 || newF < lowF)
+                            {
+                                low = f;
+                                lowF = newF;
+                            }
+                        }
+                        if (low != -1)
+                        {
+                            _end = foundList[low];
+                            break;
+                        }
+                    }
+                    i++;
+                }
+
+                if (oldEndLoc == _end.Location)
+                {
+                    DevLogger.Log($"Could not find suitable tile after {i} iterations");
+                    return _path;
+                }
+            }
+
             _openSet.Add(_start);
 
             float loopTotal = 0;
@@ -93,7 +140,6 @@ namespace dEvine_and_conquer.AI.Pathfinding.AStar
             while (_openSet.Count > 0)
             {
                 var watchLoop = Stopwatch.StartNew();
-                //Timer.Start("Pathfinding.Loop");
                 int low = 0;
 
                 for (int i = 0; i < _openSet.Count; i++)
@@ -126,7 +172,7 @@ namespace dEvine_and_conquer.AI.Pathfinding.AStar
                     break;
                 }
 
-                foreach (var local in _closest.Local)
+                foreach (var local in _closest.Traversable)
                 {
                     if (_closedSet.Contains(local))
                         continue;
@@ -154,30 +200,23 @@ namespace dEvine_and_conquer.AI.Pathfinding.AStar
                         local.h = PlaneFunctions.Heuristic(local.Location, _end.Location);
                         local.f = local.g + local.h;
                         local.Prev = _closest;
-
-                        //_closest = local;
                     }
                 }
 
                 if (Timer.Current("Pathfinding") >= 10f)
                 {
-                    //Timer.StopAndLog("Pathfinding");
-                    Debug.Log("Pathfinding stopped due to hanging.");
+                    DevLogger.Log("Pathfinding stopped due to hanging.");
                     break;
                 }
-
-                //loopTotal += Timer.Stop("Pathfinding.Loop");
                 loopTotal += watchLoop.StopAndReturn();
                 watchLoop.Stop();
                 iter++;
             }
 
-            Debug.Log($"Pathfinding loop took {(loopTotal / iter).ToString("F4")} seconds on average to complete");
-            Debug.Log($"Pathfinding went through {iter} iterations");
+            DevLogger.Log($"Pathfinding loop took {(loopTotal / iter).ToString("F4")} seconds on average to complete");
+            DevLogger.Log($"Pathfinding went through {iter} iterations");
 
-            Debug.Log($"Pathfinding should have taken around {loopTotal.ToString("F4")} seconds to complete and took {watchFull.StopAndReturn()} to complete.");
-            //watchFull.StopAndLog("Pathfinding");
-            //Timer.StopAndLog("Pathfinding");
+            DevLogger.Log($"Pathfinding should have taken around {loopTotal.ToString("F4")} seconds to complete and took {watchFull.StopAndReturn()} to complete.");
             return _path;
         }
     }

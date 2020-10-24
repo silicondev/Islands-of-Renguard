@@ -51,8 +51,7 @@ namespace dEvine_and_conquer.Base
         {
             var time = Stop(id);
             if (time > 0)
-                Debug.Log($"{id} took {time.ToString("F4")} seconds to complete.");
-                //Debug.Log(string.Format("{0} took {1} seconds to complete.", id, time.ToString("F4")));
+                DevLogger.Log($"{id} took {time.ToString("F4")} seconds to complete.");
         }
 
         public static void Remove(string id)

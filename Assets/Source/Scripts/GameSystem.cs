@@ -1,5 +1,6 @@
 ﻿using dEvine_and_conquer.Base;
 using dEvine_and_conquer.Entity;
+using dEvine_and_conquer.Object;
 using dEvine_and_conquer.World;
 using System;
 using System.Collections;
@@ -34,7 +35,8 @@ namespace dEvine_and_conquer.Scripts
         public Block CurrentBlock => Chunks.GetLoaded().GetBlockFromID(Player.Location);
         public static Block StartBlock = null;
 
-        private bool _debugMode = false;
+        private bool _loopDebug = false;
+        public static bool DebugMode = true;
 
         void Awake()
         {
@@ -70,7 +72,7 @@ namespace dEvine_and_conquer.Scripts
             foreach (var obj in Prefabs)
             {
                 obj.Value.transform.position = new Vector3(0, 0, 10);
-                if (_debugMode)
+                if (_loopDebug)
                 {
                     var renderer = obj.Value.GetComponent<SpriteRenderer>();
                     var clr = renderer.color;
@@ -86,7 +88,7 @@ namespace dEvine_and_conquer.Scripts
             var seed = Random.Range(0.0F, 10000000.0F);
             Mapper = new WorldMapperSettings(80, 100, 105, 200);
             Generator = new Generator(0.01F, seed, 16, new WorldMapper(Mapper));
-            Debug.Log("Seed: " + seed.ToString());
+            DevLogger.Log($"Seed: {seed}");
 
             var playerObj = GameObject.FindWithTag("Player");
             if (playerObj != null)
@@ -95,13 +97,15 @@ namespace dEvine_and_conquer.Scripts
                 Player.Location = (0, 0);
             }
             else
-                Debug.LogError("Could not find Player Object");
+                DevLogger.Log("Could not find Player Object");
 
             StartupGenerate();
 
             InputEvents input = GetComponent<InputEvents>();
-            input.OnMovementKeyPressed += OnMovement;
-            input.OnScroll += OnScroll;
+            input.OnMovementKeyPressed += Player.OnMove;
+            input.OnMovementKeyPressed += RefreshScreenEvent;
+            input.OnScroll += Player.OnScroll;
+            input.OnScroll += RefreshScreenEvent;
             input.OnKeyPressed += OnKeyPress;
             input.OnMouseClick += OnClick;
         }
@@ -111,18 +115,11 @@ namespace dEvine_and_conquer.Scripts
         {
             Chunks.GetLoaded().UpdateAll();
             Entities.GetLoaded().UpdateAll();
-            if (_debugMode) ForceRegen(true);
+            if (_loopDebug) ForceRegen(true);
         }
 
-        /// <summary>
-        /// Event calls every time the player moves.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void OnMovement(object sender, EventArgs e)
+        private void RefreshScreenEvent(object sender, EventArgs e)
         {
-            Player.OnMove(sender, e);
-
             var w = Screen.width;
             var h = Screen.height;
             var sev = new Vector3(0, 0, 0);
@@ -145,12 +142,6 @@ namespace dEvine_and_conquer.Scripts
             }
         }
 
-        private void OnScroll(object sender, EventArgs e)
-        {
-            Player.OnScroll(sender, e);
-            RegenChunks();
-        }
-
         private void OnKeyPress(object sender, EventArgs e)
         {
             KeyEventArgs args = (KeyEventArgs)e;
@@ -158,11 +149,13 @@ namespace dEvine_and_conquer.Scripts
             {
                 if (TileSelected)
                 {
-                    Debug.Log("Entity Human Added!");
-                    Entities.Generate(new HumanEntity(SelectedTile, 1));
+                    DevLogger.Log("Entity Human Added!");
+                    var entity = new HumanEntity(SelectedTile, 1);
+                    entity.OnDestinationReach += OnEntityReach;
+                    Entities.Generate(entity);
                     RegenEntities();
                 } else
-                    Debug.Log("ERROR: Could not add entity to world.");
+                    DevLogger.Log("ERROR: Could not add entity to world.");
             }
             else if (args.KeyPressed == KeyCode.T && TileSelected)
             {
@@ -171,14 +164,11 @@ namespace dEvine_and_conquer.Scripts
             } else if (args.KeyPressed == KeyCode.H && TileSelected)
             {
                 var block = Chunks.GetLoaded().GetBlockFromID(SelectedTile);
-                var overlay = block.Overlay;
-                var items = overlay.Harvest();
+                var items = Harvest(block);
                 foreach (var item in items)
                 {
-                    Debug.Log($"Harvested {item.Id.Name} x {item.Amount} from {block.Overlay.Type.Name}");
+                    DevLogger.Log($"Harvested {item.Id.Name} x {item.Amount} from {block.Overlay.Type.Name}");
                 }
-                overlay.Type = ObjectID.ENV.VOID;
-                ForceRegen();
             } else if (args.KeyPressed == KeyCode.Q)
             {
                 ForceRegen(true);
@@ -196,16 +186,43 @@ namespace dEvine_and_conquer.Scripts
             {
                 var block = GetBlockFromScreen(args.Position);
                 if (block == null)
-                    Debug.Log("ERROR: Could not find object.");
+                    DevLogger.Log("ERROR: Could not find object.");
                 else
                 {
-                    Debug.Log($"Tile: {block.Tile.Type.Name}. Overlay: {block.Overlay.Type.Name}");
+                    DevLogger.Log($"Tile: {block.Tile.Type.Name}. Overlay: {block.Overlay.Type.Name}");
 
                     SelectedTile = block.Location;
                     TileSelected = true;
                     ForceRegen(false);
                 }
             }
+        }
+
+        private void OnEntityReach(object sender, EventArgs e)
+        {
+            GenericEntity entity = (GenericEntity)sender;
+            TargetReachArgs args = (TargetReachArgs)e;
+            var items = Harvest(args.Destination);
+            foreach (var item in items)
+            {
+                DevLogger.Log($"Harvested {item.Id.Name} x {item.Amount} to {entity.Type.Name}");
+            }
+            entity.Inventory.AddItems(items);
+        }
+
+        private List<ItemBag> Harvest(Point tileLoc)
+        {
+            var block = Chunks.GetLoaded().GetBlockFromID(tileLoc);
+            return Harvest(block);
+        }
+
+        private List<ItemBag> Harvest(Block block)
+        {
+            var overlay = block.Overlay;
+            var items = overlay.Harvest();
+            overlay.Type = ObjectID.ENV.VOID;
+            ForceRegen(false);
+            return items;
         }
 
         private static Block GetBlockFromScreen(Vector3 position)
@@ -288,7 +305,7 @@ namespace dEvine_and_conquer.Scripts
             }
 
             if (hasNewChunks) 
-                Debug.Log("Current Generated Chunks: " + Chunks.GeneratedCount());
+                DevLogger.Log("Current Generated Chunks: " + Chunks.GeneratedCount());
 
             // Unload unneeded chunks
             List<Chunk> removeChunks = new List<Chunk>();

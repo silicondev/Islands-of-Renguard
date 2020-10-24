@@ -26,6 +26,9 @@ namespace dEvine_and_conquer.Entity
         protected List<Point> currentPath;
         protected int pathProgress = 0;
         private float _moveSpeed = 5.0F;
+        private Point _movingFrom;
+        private Point _movingTo;
+        private bool _movingToSuccess = false;
 
         public GenericEntity(Point loc, Prefab type, int invSlots, List<Sprite> textures = null) : base(loc)
         {
@@ -63,11 +66,13 @@ namespace dEvine_and_conquer.Entity
                 Location.X = Mathf.MoveTowards(Location.X, newLoc.X, Time.deltaTime * _moveSpeed);
                 Location.Y = Mathf.MoveTowards(Location.Y, newLoc.Y, Time.deltaTime * _moveSpeed);
                 if (Location == newLoc) pathProgress++;
-            }
-            if (currentPath != null && pathProgress == currentPath.Count)
-            {
-                isMoving = false;
-                pathProgress = 0;
+
+                if (pathProgress == currentPath.Count)
+                {
+                    isMoving = false;
+                    pathProgress = 0;
+                    OnDestinationReach?.Invoke(this, new TargetReachArgs(_movingFrom, _movingTo, _movingToSuccess));
+                }
             }
         }
 
@@ -85,6 +90,9 @@ namespace dEvine_and_conquer.Entity
         {
             if (destination == Location) return;
 
+            _movingFrom = Location.Copy();
+            _movingTo = destination.Copy();
+
             var chunks = GameSystem.Chunks.GetLoaded();
 
             List<Block> blocks = new List<Block>();
@@ -98,9 +106,11 @@ namespace dEvine_and_conquer.Entity
             if (currentPath != null && currentPath.Any())
             {
                 isMoving = true;
-                //Debug.Log(string.Format("{0} Entity is moving from {1},{2} to {3},{4}", Type.Name, Location.X.ToString(), Location.Y.ToString(), destination.X.ToString(), destination.Y.ToString()));
-                Debug.Log($"{Type.Name} Entity is moving from {Location} to {destination}");
+                _movingToSuccess = currentPath.Last() == destination;
+                DevLogger.Log($"{Type.Name} Entity is moving from {Location} to {destination}");
             }
         }
+
+        public event EventHandler OnDestinationReach;
     }
 }

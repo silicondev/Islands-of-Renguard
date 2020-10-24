@@ -34,7 +34,7 @@ namespace dEvine_and_conquer.Base
         public static float StopAndLog(this Stopwatch watch, string name)
         {
             float secs = watch.StopAndReturn();
-            Debug.Log($"{name} took {secs.ToString("F4")} seconds to complete.");
+            DevLogger.Log($"{name} took {secs.ToString("F4")} seconds to complete.");
             return secs;
         }
     }

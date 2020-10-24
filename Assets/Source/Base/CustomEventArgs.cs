@@ -39,6 +39,20 @@ namespace dEvine_and_conquer.Base
         }
     }
 
+    public class TargetReachArgs : EventArgs
+    {
+        public Point Destination { get; }
+        public Point Start { get; }
+        public bool Success { get; }
+
+        public TargetReachArgs(Point start, Point dest, bool success)
+        {
+            Start = start;
+            Destination = dest;
+            Success = success;
+        }
+    }
+
     public static class MouseButton
     {
         public static int LEFT = 0;

@@ -14,6 +14,7 @@ namespace dEvine_and_conquer.AI.Pathfinding.AStar
         public float g = 0;
         public float h = 0;
         public List<AStarTile> Local = new List<AStarTile>();
+        public List<AStarTile> Traversable = new List<AStarTile>();
         public AStarTile Prev { get; set; } = null;
         public Block Block { get; }
         public bool IsWall => Block.IsCollidable;
@@ -52,6 +53,15 @@ namespace dEvine_and_conquer.AI.Pathfinding.AStar
             AStarTile tse = se ? grid.Get(x + 1, y - 1) : null;
             AStarTile tsw = sw ? grid.Get(x - 1, y - 1) : null;
 
+            if (e) Local.Add(te);
+            if (w) Local.Add(tw);
+            if (n) Local.Add(tn);
+            if (s) Local.Add(ts);
+            if (ne) Local.Add(tne);
+            if (nw) Local.Add(tnw);
+            if (se) Local.Add(tse);
+            if (sw) Local.Add(tsw);
+
             bool we = e ? te.IsWall : true;
             bool ww = w ? tw.IsWall : true;
             bool wn = n ? tn.IsWall : true;
@@ -61,15 +71,15 @@ namespace dEvine_and_conquer.AI.Pathfinding.AStar
             bool wse = se ? tse.IsWall : true;
             bool wsw = sw ? tsw.IsWall : true;
 
-            if (!we) Local.Add(te);
-            if (!ww) Local.Add(tw);
-            if (!wn) Local.Add(tn);
-            if (!ws) Local.Add(ts);
+            if (!we) Traversable.Add(te);
+            if (!ww) Traversable.Add(tw);
+            if (!wn) Traversable.Add(tn);
+            if (!ws) Traversable.Add(ts);
 
-            if (!wne && !wn && !we) Local.Add(tne);
-            if (!wnw && !wn && !ww) Local.Add(tnw);
-            if (!wse && !ws && !we) Local.Add(tse);
-            if (!wsw && !ws && !ww) Local.Add(tsw);
+            if (!wne && !wn && !we) Traversable.Add(tne);
+            if (!wnw && !wn && !ww) Traversable.Add(tnw);
+            if (!wse && !ws && !we) Traversable.Add(tse);
+            if (!wsw && !ws && !ww) Traversable.Add(tsw);
         }
     }
 }

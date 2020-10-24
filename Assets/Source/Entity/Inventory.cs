@@ -52,5 +52,33 @@ namespace dEvine_and_conquer.Entity
         {
             return new List<ItemBag>(_items);
         }
+
+        public bool AddItem(ItemBag item)
+        {
+            checkItems();
+            for (int i = 0; i < Slots; i++)
+            {
+                if (_items[i] == _nullItem)
+                {
+                    SetItem(item, i);
+                    checkItems();
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public bool AddItems(List<ItemBag> items)
+        {
+            var output = false;
+            foreach (var item in items)
+            {
+                if (AddItem(item))
+                    output = true;
+                else
+                    break;
+            }
+            return output;
+        }
     }
 }
